@@ -1,7 +1,5 @@
 package сonversions.fourier.util;
 
-import сonversions.fourier.TimeWindow;
-
 import java.lang.Math;
 
 public final class FFT {
@@ -10,15 +8,17 @@ public final class FFT {
 
     private double[] cos;
     private double[] sin;
-    private double[] window;
 
-    public FFT(int n, TimeWindow currentWindow) {
-        this.n = n;
-        this.m = (int) (Math.log(n) / Math.log(2));
+    public FFT(int n) {
         // Make sure n is a power of 2
-        if (n != (1 << m)) {
-            throw new RuntimeException("FFT length must be power of 2");
+        if(n<=0 || (n&(n-1))!=0){
+            throw new IllegalArgumentException("Array length for FFT must be power of 2");
         }
+
+        this.n = n;
+        //m = log2(n)
+        this.m = 31 - Integer.numberOfLeadingZeros(n);
+
         // precompute tables
         cos = new double[n / 2];
         sin = new double[n / 2];
@@ -27,11 +27,6 @@ public final class FFT {
             cos[i] = Math.cos(-2 * Math.PI * i / n);
             sin[i] = Math.sin(-2 * Math.PI * i / n);
         }
-        window = currentWindow.makeWindow(n);
-    }
-
-    public double[] getWindow() {
-        return window;
     }
 
     /**

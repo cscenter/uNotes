@@ -11,8 +11,8 @@ import java.util.Vector;
 
 class Runner {
     public static void main(String[] args) {
-        int nhop = 100;
-        int nfft = 512;
+        int timeStepLength = 100;
+        int windowLength = 512;
 
         File dir = new File("test", "music");
         String inputFileName = "a.wav";
@@ -26,7 +26,7 @@ class Runner {
             TimeSeries series = new TimeSeries(stream);
             series.start();
 
-            STFT stft = new STFT(nfft, nhop, new BlackmanWindow());
+            STFT stft = new STFT(windowLength, timeStepLength, new BlackmanWindow());
             Spectrum result = stft.transform(series);
 
             Vector<double[]> power = result.getPowerSpectrum();
@@ -43,7 +43,7 @@ class Runner {
 
 
         } catch (Exception ex) {
-            System.out.print(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

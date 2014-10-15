@@ -1,32 +1,34 @@
 package сonversions;
 
+import com.sun.istack.internal.NotNull;
+
 import javax.sound.sampled.*;
 import java.io.*;
 import java.util.Vector;
 
 
 public class TimeSeries {
-    private AudioInputStream input;
-    private AudioFormat format;
-    private int bytesPerWavFrame;
-    private int frameLen;
-    private int channels;
-    private int sampleRate;
-    private Vector<double[]> tracks = new Vector<double[]>();
-    private Vector<Double> track = new Vector<Double>();
-    private Vector<Double> sum = new Vector<Double>();
+    private AudioInputStream myInput;
+    private AudioFormat myFormat;
+    private int myBytesPerWavFrame;
+    private int myFrameLen;
+    private int myChannels;
+    private int mySampleRate;
+    private Vector<double[]> myTracks = new Vector<double[]>();
+    private Vector<Double> myTrack = new Vector<Double>();
+    private Vector<Double> mySum = new Vector<Double>();
 
-    private static final double rmsTarget = 0.08;
-    private static final double rmsAlpha = 0.001;
-    private double rms = 1;
-    private static final double rmsMin = 0.5 * rmsTarget;
+    private static final double ourRmsTarget = 0.08;
+    private static final double ourRmsAlpha = 0.001;
+    private double myRms = 1;
+    private static final double ourRmsMin = 0.5 * ourRmsTarget;
 
     // The line should be open, but not started yet.
-    private int readFrame() {
+    private int readFrame() {// TODO: why do we need to return int?
         byte[] b = new byte[getBytesPerWavFrame()];
         int rs = 0;
         try {
-            rs = input.read(b);
+            rs = myInput.read(b);
         } catch (IOException ioe) {
             ioe.printStackTrace();
             return (rs);
@@ -41,64 +43,64 @@ public class TimeSeries {
         }
         avg /= getChannels();
         s /= getChannels();
-        tracks.add(wav);
-        track.add(avg);
-        sum.add(s);
+        myTracks.add(wav);
+        myTrack.add(avg);
+        mySum.add(s);
         return rs;
     }
 
-    private void normalize(double rms) {
+    private void normalize(double rms) {// TODO: use myRms here instead of parameter rms?
         for (int i = 0; i < getFrameLen(); ++i) {
             for (int j = 0; j < getChannels(); ++j) {
-                double[] temp = tracks.elementAt(i);
-                temp[j] *= rmsTarget / rms;
-                tracks.set(i, temp);
+                double[] temp = myTracks.elementAt(i);
+                temp[j] *= ourRmsTarget / rms;
+                myTracks.set(i, temp);
             }
 
-            track.set(i, track.elementAt(i) * rmsTarget / rms);
+            myTrack.set(i, myTrack.elementAt(i) * ourRmsTarget / rms);
         }
     }
 
-    public TimeSeries(AudioInputStream input) {
-        this.frameLen = (int) input.getFrameLength();
-        format = input.getFormat();
-        this.channels = format.getChannels();
-        this.input = input;
-        bytesPerWavFrame = format.getFrameSize();
-        sampleRate = (int) format.getSampleRate();
+    public TimeSeries(@NotNull AudioInputStream input) {
+        myInput = input;
+        myFrameLen = (int) myInput.getFrameLength();
+        myFormat = myInput.getFormat();
+        myChannels = myFormat.getChannels();
+        myBytesPerWavFrame = myFormat.getFrameSize();
+        mySampleRate = (int) myFormat.getSampleRate();
     }
 
     public void start() {
         double rmsCur = 0;
         for (int i = 0; i < this.getFrameLen(); ++i) {
             readFrame();
-            rmsCur += sum.lastElement();
+            rmsCur += mySum.lastElement();
         }
         rmsCur = Math.sqrt(rmsCur / getFrameLen());
-        rms = rmsAlpha * rmsCur + (1 - rmsAlpha) * rms;
+        myRms = ourRmsAlpha * rmsCur + (1 - ourRmsAlpha) * myRms;
 
         // Keep it from amplifying silence too much
-        if (rms < rmsMin) {
+        if (myRms < ourRmsMin) {
             //      System.out.print(".");
-            rms = rmsMin;
+            myRms = ourRmsMin;
         }
-        normalize(rms);
+        normalize(myRms);
     }
 
-    public double[] getChannel(int channel) {
+    public double[] getChannel(int channel) {   // TODO: do we need this method?
         double[] answ = new double[getFrameLen()];
         for (int i = 0; i < getFrameLen(); ++i) {
-            answ[i] = tracks.elementAt(i)[channel];
+            answ[i] = myTracks.elementAt(i)[channel];
         }
         return answ;
     }
 
     public double[] getTrack() {
-        double[] answ = new double[getFrameLen()];
+        double[] track = new double[getFrameLen()];
         for (int i = 0; i < getFrameLen(); ++i) {
-            answ[i] = track.elementAt(i);
+            track[i] = myTrack.elementAt(i);
         }
-        return (answ);
+        return track;
     }
 
 
@@ -106,28 +108,28 @@ public class TimeSeries {
     // the channels will be interleaved with each other in the double
     // stream, as in the byte stream.
     void bytes2doubles(byte[] audioBytes, double[] audioData) {
-        if (format.getSampleSizeInBits() == 16) {
-            if (format.isBigEndian()) {
+        if (myFormat.getSampleSizeInBits() == 16) {
+            if (myFormat.isBigEndian()) {
                 for (int i = 0; i < audioData.length; i++) {
-           /* First byte is MSB (high order) */
+                    // First byte is MSB (high order)
                     int MSB = (int) audioBytes[2 * i];
-           /* Second byte is LSB (low order) */
+                    // Second byte is LSB (low order)
                     int LSB = (int) audioBytes[2 * i + 1];
                     audioData[i] = ((double) (MSB << 8 | (255 & LSB)))
                             / 32768.0;
                 }
             } else {
                 for (int i = 0; i < audioData.length; i++) {
-           /* First byte is LSB (low order) */
+                    // First byte is LSB (low order)
                     int LSB = (int) audioBytes[2 * i];
-           /* Second byte is MSB (high order) */
+                    // Second byte is MSB (high order)
                     int MSB = (int) audioBytes[2 * i + 1];
                     audioData[i] = ((double) (MSB << 8 | (255 & LSB)))
                             / 32768.0;
                 }
             }
-        } else if (format.getSampleSizeInBits() == 8) {
-            if (format.getEncoding().toString().startsWith("PCM_SIGN")) {
+        } else if (myFormat.getSampleSizeInBits() == 8) {
+            if (myFormat.getEncoding().toString().startsWith("PCM_SIGN")) {
                 for (int i = 0; i < audioBytes.length; i++) {
                     audioData[i] = audioBytes[i] / 128.0;
                 }
@@ -140,18 +142,18 @@ public class TimeSeries {
     }
 
     int getBytesPerWavFrame() {
-        return bytesPerWavFrame;
+        return myBytesPerWavFrame;
     }
 
     public int getFrameLen() {
-        return frameLen;
+        return myFrameLen;
     }
 
     int getChannels() {
-        return channels;
+        return myChannels;
     }
 
     public int getSampleRate() {
-        return sampleRate;
+        return mySampleRate;
     }
 }
