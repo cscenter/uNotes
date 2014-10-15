@@ -47,7 +47,7 @@ public class TimeSeries {
         return rs;
     }
 
-    private void normalise(double rms) {
+    private void normalize(double rms) {
         for (int i = 0; i < getFrameLen(); ++i) {
             for (int j = 0; j < getChannels(); ++j) {
                 double[] temp = tracks.elementAt(i);
@@ -82,11 +82,11 @@ public class TimeSeries {
             //      System.out.print(".");
             rms = rmsMin;
         }
-        normalise(rms);
+        normalize(rms);
     }
 
     public double[] getChannel(int channel) {
-        double[] answ = new double[(int) getFrameLen()];
+        double[] answ = new double[getFrameLen()];
         for (int i = 0; i < getFrameLen(); ++i) {
             answ[i] = tracks.elementAt(i)[channel];
         }
@@ -94,7 +94,7 @@ public class TimeSeries {
     }
 
     public double[] getTrack() {
-        double[] answ = new double[(int) getFrameLen()];
+        double[] answ = new double[getFrameLen()];
         for (int i = 0; i < getFrameLen(); ++i) {
             answ[i] = track.elementAt(i);
         }
@@ -105,7 +105,7 @@ public class TimeSeries {
     // Convert a byte stream into a stream of doubles.  If it's stereo,
     // the channels will be interleaved with each other in the double
     // stream, as in the byte stream.
-    public void bytes2doubles(byte[] audioBytes, double[] audioData) {
+    void bytes2doubles(byte[] audioBytes, double[] audioData) {
         if (format.getSampleSizeInBits() == 16) {
             if (format.isBigEndian()) {
                 for (int i = 0; i < audioData.length; i++) {
@@ -127,7 +127,6 @@ public class TimeSeries {
                 }
             }
         } else if (format.getSampleSizeInBits() == 8) {
-            int nlengthInSamples = audioBytes.length;
             if (format.getEncoding().toString().startsWith("PCM_SIGN")) {
                 for (int i = 0; i < audioBytes.length; i++) {
                     audioData[i] = audioBytes[i] / 128.0;
@@ -140,7 +139,7 @@ public class TimeSeries {
         }
     }
 
-    public int getBytesPerWavFrame() {
+    int getBytesPerWavFrame() {
         return bytesPerWavFrame;
     }
 
@@ -148,7 +147,7 @@ public class TimeSeries {
         return frameLen;
     }
 
-    public int getChannels() {
+    int getChannels() {
         return channels;
     }
 

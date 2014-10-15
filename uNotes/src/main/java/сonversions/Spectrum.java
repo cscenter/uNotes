@@ -2,9 +2,6 @@ package сonversions;
 
 import java.util.Vector;
 
-/**
- * Created by Денис on 04.10.2014.
- */
 public class Spectrum {
     private Vector<double[]> myPower;
     private double myTimeStep;
@@ -17,10 +14,10 @@ public class Spectrum {
     }
 
     public void addFrame(double[] newFrame) {
-        getPower().add(newFrame);
+        getPowerSpectrum().add(newFrame);
     }
 
-    public Vector<double[]> getPower() {
+    public Vector<double[]> getPowerSpectrum() {
         return myPower;
     }
 
