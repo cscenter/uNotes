@@ -1,4 +1,4 @@
-package сonversions;
+package conversions;
 
 public class Peak{
     public double power;

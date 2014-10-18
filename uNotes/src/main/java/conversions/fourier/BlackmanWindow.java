@@ -1,4 +1,4 @@
-package сonversions.fourier;
+package conversions.fourier;
 
 /**
  * Make a Blackman window:

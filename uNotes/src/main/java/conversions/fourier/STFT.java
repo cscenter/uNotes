@@ -1,10 +1,10 @@
-package сonversions.fourier;
+package conversions.fourier;
 
 import com.sun.istack.internal.NotNull;
-import сonversions.Spectrum;
-import сonversions.TimeSeries;
-import сonversions.Transformation;
-import сonversions.fourier.util.FFT;
+import conversions.Spectrum;
+import conversions.TimeSeries;
+import conversions.Transformation;
+import conversions.fourier.util.FFT;
 
 import java.util.Vector;
 

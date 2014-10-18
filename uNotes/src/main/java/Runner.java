@@ -1,7 +1,7 @@
-import сonversions.Spectrum;
-import сonversions.TimeSeries;
-import сonversions.fourier.BlackmanWindow;
-import сonversions.fourier.STFT;
+import conversions.Spectrum;
+import conversions.TimeSeries;
+import conversions.fourier.BlackmanWindow;
+import conversions.fourier.STFT;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;

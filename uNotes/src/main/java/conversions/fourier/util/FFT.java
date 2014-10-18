@@ -1,4 +1,4 @@
-package сonversions.fourier.util;
+package conversions.fourier.util;
 
 import java.lang.Math;
 
