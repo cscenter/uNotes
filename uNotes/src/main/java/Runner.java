@@ -31,13 +31,16 @@ class Runner {
 
             Vector<double[]> power = result.getPowerSpectrum();
 
+            double t0 = result.getTimeZeroPoint();
+            double nu0 = result.getFrequencyZeroPoint();
+
             double dt = result.getTimeStep();
             double dnu = result.getFrequencyStep();
             PrintStream out = new PrintStream(new File(inputFileName + ".power.dat"));
 
             for (int i = 0; i < power.size(); ++i) {
                 for (int j = 0; j < power.elementAt(i).length; j++) {
-                    out.println(i * dt + "   " + j * dnu + "  " + power.elementAt(i)[j]);
+                    out.println(i * dt + t0 + "   " + j * dnu + nu0 + "  " + power.elementAt(i)[j]);
                 }
             }
 

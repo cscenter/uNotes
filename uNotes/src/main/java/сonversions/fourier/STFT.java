@@ -12,7 +12,7 @@ import java.util.Vector;
  * Short-time Fourier transform
  */
 public class STFT implements Transformation {
-    private final static double ourEpsilon = 1.0e-09;
+    private final static double OUR_EPSILON = 1.0e-09;
 
     private int myWindowLength;
     private int myTimeStepLength;
@@ -35,7 +35,7 @@ public class STFT implements Transformation {
         double frequencyStep = ownSeries.getSampleRate() * 1.0 / myWindowLength;
         double timeStep = myTimeStepLength * 1.0 / ownSeries.getSampleRate();
 
-        Spectrum currentSpectrum = new Spectrum(new Vector<double[]>(), timeStep, frequencyStep);
+        Spectrum currentSpectrum = new Spectrum(new Vector<double[]>(), myWindowLength / 2.0 / ownSeries.getSampleRate(), 0.0, timeStep, frequencyStep);
 
         FFT fft = new FFT(myWindowLength);
         double[] window = myWindow.makeWindow(myWindowLength);
@@ -49,6 +49,7 @@ public class STFT implements Transformation {
             if (zeroPadLen < 0) {
                 zeroPadLen = 0;
             }
+
             int wavLen = wav.length - zeroPadLen;
 
             //for(int i = 0; i < wav.length; i++)
@@ -73,7 +74,7 @@ public class STFT implements Transformation {
             double[] mag = new double[myWindowLength / 2];
 
             for (int i = 0; i < mag.length; i++) {
-                mag[i] = 10 * Math.log10(re[i] * re[i] + im[i] * im[i] + ourEpsilon);
+                mag[i] = 10 * Math.log10(re[i] * re[i] + im[i] * im[i] + OUR_EPSILON);
             }
 
             currentSpectrum.addFrame(mag);
