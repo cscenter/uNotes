@@ -2,12 +2,14 @@ import conversions.Spectrum;
 import conversions.TimeSeries;
 import conversions.fourier.BlackmanWindow;
 import conversions.fourier.STFT;
+import conversions.fourier.SpectrumTransformer;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Vector;
+import java.lang.Math;
 
 class Runner {
     public static void main(String[] args) {
@@ -29,6 +31,9 @@ class Runner {
             STFT stft = new STFT(windowLength, timeStepLength, new BlackmanWindow());
             Spectrum result = stft.transform(series);
 
+            SpectrumTransformer noteGetter = new SpectrumTransformer(result);
+
+
             Vector<double[]> power = result.getPowerSpectrum();
 
             double t0 = result.getTimeZeroPoint();
@@ -44,6 +49,14 @@ class Runner {
                 }
             }
 
+            PrintStream outNotes = new PrintStream(new File(inputFileName + ".fft2.dat"));
+
+            for (int i = 0; i < power.size(); ++i) {
+                double[] slice = noteGetter.transform(i);
+                for (int j = 1; j < slice.length / 2; j++) {
+                        outNotes.println(dt * i + t0 + "   " + slice.length * dnu / j + "  " + slice[j]);
+                }
+            }
 
         } catch (Exception ex) {
             ex.printStackTrace();
