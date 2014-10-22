@@ -4,7 +4,7 @@ import java.util.Vector;
 
 public class PeakExtracter{
 
-    private Vector<double[]> raws;
+    private Vector<double[]> raws; //todo rename
     private Vector<Vector<Peak>> peaks;
     private double timeStep;
     private double freqStep;
@@ -19,17 +19,16 @@ public class PeakExtracter{
     }
 
     public void extract(){
-        int fsize = raws.get(0).length;
+        int fsize = raws.get(0).length; //todo check NPE
         int tsize = raws.size();
         int decline = 0;
-        int declineNew = 0;
+        int declineNew = 0; // todo boolean
         double c_freq = 0;
         double l_freq = 0;
         double c_pow = 0;
         double l_pow = 0;
         peaks = new Vector<Vector<Peak>>();
-        for (int i = 0; i < tsize; ++i){
-            double[] cur = raws.get(i);
+        for (double[] cur : raws) {
             l_freq = 0;
             l_pow = cur[0];
             decline = 0;
