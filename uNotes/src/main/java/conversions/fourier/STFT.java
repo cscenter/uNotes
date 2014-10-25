@@ -30,6 +30,43 @@ public class STFT implements Transformation {
         myWindow = window;
     }
 
+    public STFT(Spectrum input, @NotNull TimeWindow window) {
+        if (! input.getPowerSpectrum().isEmpty()) {
+            myWindowLength = input.getPowerSpectrum().elementAt(0).length;
+        } else return;
+
+        myTimeStepLength = 1;
+        myWindow = window;
+    }
+
+    public Spectrum spectrumTransform(Spectrum input) {
+        double frequencyStep = 1.0 / myWindowLength / input.getFrequencyStep();
+        double timeStep = input.getTimeStep();
+
+        Spectrum currentSpectrum = new Spectrum(new Vector<double[]>(), input.getTimeZeroPoint(), 0.0, timeStep, frequencyStep);
+
+        FFT fft = new FFT(myWindowLength);
+        double[] window = myWindow.makeWindow(myWindowLength);
+
+        for (int sectionNum = 0; sectionNum < input.getPowerSpectrum().size(); ++sectionNum) {
+            double[] re = new double[myWindowLength];
+            double[] im = new double[myWindowLength];
+            double[] mag = new double[myWindowLength / 2];
+            System.arraycopy(input.getPowerSpectrum().elementAt(sectionNum), 0, re, 0, myWindowLength);
+
+            fft.transform(re, im);
+
+            for (int i = 0; i < mag.length; i++) {
+                //mag[i] = 10 * Math.log10(re[i] * re[i] + im[i] * im[i] + OUR_EPSILON);
+                mag[i] = Math.sqrt(re[i] * re[i] + im[i] * im[i]);
+            }
+
+            currentSpectrum.addFrame(mag);
+        }
+
+        return currentSpectrum;
+    }
+
     @Override
     public Spectrum transform(TimeSeries ownSeries) {
         double frequencyStep = ownSeries.getSampleRate() * 1.0 / myWindowLength;
