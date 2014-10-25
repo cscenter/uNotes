@@ -15,11 +15,11 @@ import java.util.Vector;
  */
 public class WaveletSpectrumTransformRunner {
     public static void main(String[] args) {
-        int timeStepLength = 200;
-        int windowLength = 4096;
+        int timeStepLength = 120;
+        int windowLength = 512;
 
         File dir = new File("test", "music");
-        String inputFileName = "Am_chords.wav";
+        String inputFileName = "a.wav";
         File in = new File(dir, inputFileName);
 
         System.out.println("uNotes");
@@ -33,9 +33,6 @@ public class WaveletSpectrumTransformRunner {
             STFT stft = new STFT(windowLength, timeStepLength, new BlackmanWindow());
             Spectrum result = stft.transform(series);
 
-            WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result);
-
-
             Vector<double[]> power = result.getPowerSpectrum();
 
             double t0 = result.getTimeZeroPoint();
@@ -47,19 +44,26 @@ public class WaveletSpectrumTransformRunner {
 
             for (int i = 0; i < power.size(); ++i) {
                 for (int j = 0; j < power.elementAt(i).length; j++) {
-                    out.println(i * dt + t0 + "   " + j * dnu + nu0 + "  " + power.elementAt(i)[j]);
+                    out.println((i * dt + t0) + "   " + (j * dnu + nu0) + "  " + power.elementAt(i)[j]);
                 }
             }
 
+            WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result);
+
+            Spectrum subSpectrum = noteGetter.spectrumTransform(result);
+
+            power = subSpectrum.getPowerSpectrum();
+
+            t0 = subSpectrum.getTimeZeroPoint();
+            nu0 = subSpectrum.getFrequencyZeroPoint();
+
+            dt = subSpectrum.getTimeStep();
+            dnu = subSpectrum.getFrequencyStep();
             PrintStream outNotes = new PrintStream(new File(inputFileName + ".wt2.dat"));
 
-            dnu = result.getFrequencyStep() / noteGetter.ALPHA;
-            nu0 = 2 * dnu;
-
             for (int i = 0; i < power.size(); ++i) {
-                double[] slice = noteGetter.transform(i);
-                for (int j = 0; j < slice.length; j++) {
-                    outNotes.println((dt * i + t0) + "   " + (nu0 + dnu * j) + "  " + slice[j]);
+                for (int j = 0; j < power.elementAt(i).length; j++) {
+                    outNotes.println((i * dt + t0) + "   " + (j * dnu + nu0) + "  " + power.elementAt(i)[j]);
                 }
             }
 
