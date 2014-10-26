@@ -2,14 +2,14 @@ package conversions;
 
 import java.util.Vector;
 
-public class PeakExtracter{
+public class PeakExtractor {
 
     private Vector<double[]> raws; //todo rename
     private Vector<Vector<Peak>> peaks;
     private double timeStep;
     private double freqStep;
 
-    public PeakExtracter(double timeStep, double freqStep){
+    public PeakExtractor(double timeStep, double freqStep){
         this.timeStep = timeStep;
         this.freqStep = freqStep;
     }
