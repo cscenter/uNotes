@@ -24,7 +24,7 @@ public class WaveletSpectrumTransform implements Transformation{
     public WaveletSpectrumTransform(int windowLength, int timeStepLength) {
         myWindowLength = windowLength;
         myTimeStepLength = timeStepLength;
-        beforeCounting();
+        beforeCounting(true);
     }
 
     public WaveletSpectrumTransform(@NotNull Spectrum input){
@@ -36,10 +36,10 @@ public class WaveletSpectrumTransform implements Transformation{
 
         myWindowLength = windowLength;
         myTimeStepLength = 1;
-        beforeCounting();
+        beforeCounting(false);
     }
 
-    private void beforeCounting() {
+    private void beforeCounting(boolean isModulate) {
 
         int scaleLength = myWindowLength - 2;
 
@@ -56,25 +56,44 @@ public class WaveletSpectrumTransform implements Transformation{
 
         myNormalizingFactor = new double[scaleLength];
 
-        for (int i = 0; i < myNormalizingFactor.length; ++i) {
-            double[] arguments = myWaveletsArguments.get(i);
-            for (int k = 0; k < myWindowLength; ++k) {
-                myNormalizingFactor[i] += Math.exp(-1.0 * Math.pow(arguments[k], 2.0) / B);
+        //if (isModulate) {
+            for (int i = 0; i < myNormalizingFactor.length; ++i) {
+                double[] arguments = myWaveletsArguments.get(i);
+                for (int k = 0; k < myWindowLength; ++k) {
+                    myNormalizingFactor[i] += Math.exp(-1.0 * Math.pow(arguments[k], 2.0) / B);
+                }
             }
-        }
+       // } else {
+         //   for (int i = 0; i < myNormalizingFactor.length; ++i) {
+           //     myNormalizingFactor[i] = (double) myWindowLength;
+           // }
+        //}
 
         myWavelet = new ArrayList<Complex[]>();
         Complex[] section;
 
-        for (int i = 0; i < scaleLength; ++i) {
-            double[] arguments = myWaveletsArguments.get(i);
-            section = new Complex[myWindowLength];
-            for (int k = 0; k < myWindowLength; ++k) {
-                double arg = 2.0 * Math.PI * arguments[k];
-                double rate = Math.exp(-1.0 * Math.pow(arguments[k] / B, 2.0));
-                section[k] = new Complex(rate * Math.cos(arg), -rate * Math.sin(arg));
+        if (isModulate) {
+            for (int i = 0; i < scaleLength; ++i) {
+                double[] arguments = myWaveletsArguments.get(i);
+                section = new Complex[myWindowLength];
+                for (int k = 0; k < myWindowLength; ++k) {
+                    double arg = 2.0 * Math.PI * arguments[k];
+                    double rate;
+                    rate = Math.exp(-1.0 * Math.pow(arguments[k] / B, 2.0));
+                    section[k] = new Complex(rate * Math.cos(arg), -rate * Math.sin(arg));
+                }
+                myWavelet.add(section);
             }
-            myWavelet.add(section);
+        } else {
+            for (int i = 0; i < scaleLength; ++i) {
+                double[] arguments = myWaveletsArguments.get(i);
+                section = new Complex[myWindowLength];
+                for (int k = 0; k < myWindowLength; ++k) {
+                    double arg = 2.0 * Math.PI * arguments[k];
+                    section[k] = new Complex(Math.cos(arg), -Math.sin(arg));
+                }
+                myWavelet.add(section);
+            }
         }
     }
 
