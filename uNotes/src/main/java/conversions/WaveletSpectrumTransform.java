@@ -39,6 +39,69 @@ public class WaveletSpectrumTransform implements Transformation{
         beforeCounting(false);
     }
 
+    public WaveletSpectrumTransform(@NotNull Spectrum input, double[] counts) {
+
+        if (counts == null) {
+            throw new NullPointerException("double[] counts is null");
+        }
+
+        int windowLength;
+        if (! input.getPowerSpectrum().isEmpty()) {
+            windowLength = input.getPowerSpectrum().elementAt(0).length;
+        } else return;
+
+        myWindowLength = windowLength;
+        myTimeStepLength = 1;
+
+        double frequencyStep = input.getFrequencyStep();
+
+        int countsLength = counts.length;
+
+        if ((counts[0] < 1.9 * frequencyStep / ALPHA) || (counts[countsLength - 1] > (myWindowLength - 0.9) * frequencyStep / ALPHA)) {
+            throw new IllegalArgumentException("your counts are out of wavelet range");
+        }
+
+        for (int i = 1; i < countsLength; ++i) {
+            if (counts[i] < counts[i - 1]) {
+                throw new IllegalArgumentException("your counts are not sorted");
+            }
+        }
+
+        myWaveletsArguments = new ArrayList<double[]>();
+        int timeShift = myWindowLength / 2;
+
+        for (int i = 0; i < countsLength; ++i) {
+            double[] arguments = new double[myWindowLength];
+            for (int k = 0; k < myWindowLength; ++k) {
+                arguments[k] = (k - timeShift) * frequencyStep / counts[i];
+            }
+            myWaveletsArguments.add(arguments);
+        }
+
+        myNormalizingFactor = new double[countsLength];
+
+        for (int i = 0; i < myNormalizingFactor.length; ++i) {
+            double[] arguments = myWaveletsArguments.get(i);
+            for (int k = 0; k < myWindowLength; ++k) {
+                myNormalizingFactor[i] += Math.exp(-1.0 * Math.pow(arguments[k], 2.0) / B);
+            }
+        }
+
+        myWavelet = new ArrayList<Complex[]>();
+        Complex[] section;
+
+        for (int i = 0; i < countsLength; ++i) {
+            double[] arguments = myWaveletsArguments.get(i);
+            section = new Complex[myWindowLength];
+            for (int k = 0; k < myWindowLength; ++k) {
+                double arg = 2.0 * Math.PI * arguments[k];
+                section[k] = new Complex(Math.cos(arg), -Math.sin(arg));
+            }
+            myWavelet.add(section);
+        }
+
+    }
+
     private void beforeCounting(boolean isModulate) {
 
         int scaleLength = myWindowLength - 2;
@@ -56,18 +119,12 @@ public class WaveletSpectrumTransform implements Transformation{
 
         myNormalizingFactor = new double[scaleLength];
 
-        //if (isModulate) {
-            for (int i = 0; i < myNormalizingFactor.length; ++i) {
-                double[] arguments = myWaveletsArguments.get(i);
-                for (int k = 0; k < myWindowLength; ++k) {
-                    myNormalizingFactor[i] += Math.exp(-1.0 * Math.pow(arguments[k], 2.0) / B);
-                }
+        for (int i = 0; i < myNormalizingFactor.length; ++i) {
+            double[] arguments = myWaveletsArguments.get(i);
+            for (int k = 0; k < myWindowLength; ++k) {
+                myNormalizingFactor[i] += Math.exp(-1.0 * Math.pow(arguments[k], 2.0) / B);
             }
-       // } else {
-         //   for (int i = 0; i < myNormalizingFactor.length; ++i) {
-           //     myNormalizingFactor[i] = (double) myWindowLength;
-           // }
-        //}
+        }
 
         myWavelet = new ArrayList<Complex[]>();
         Complex[] section;
@@ -105,7 +162,7 @@ public class WaveletSpectrumTransform implements Transformation{
         Spectrum currentSpectrum = new Spectrum(new Vector<double[]>(), input.getTimeZeroPoint(),
                  2 * input.getFrequencyStep() / ALPHA, timeStep, scaleStep);
 
-        int scaleLength = myWindowLength - 2;
+        int scaleLength = myWaveletsArguments.size();
 
         for (int sectionNum = 0; sectionNum < input.getPowerSpectrum().size(); ++sectionNum) {
             double[] wav = new double[myWindowLength];

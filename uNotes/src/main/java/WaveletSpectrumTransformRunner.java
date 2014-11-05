@@ -8,6 +8,9 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Vector;
 
+/**
+ * Created by User on 21.10.2014.
+ */
 public class WaveletSpectrumTransformRunner {
     public static void main(String[] args) {
         int timeStepLength = 256;
@@ -70,23 +73,33 @@ public class WaveletSpectrumTransformRunner {
                 }
             }
 
-            /*
-            PrintStream outPeaks = new PrintStream(new File(inputFileName + ".pkt.dat"));
-            PeakCrossExtractor pke = new PeakCrossExtractor(dt, dnu, 10);
+            ///////////////////////////////////////////////////////
 
-            pke.loadSpectrum(power);
+            int spectrumLength = result.getPowerSpectrum().elementAt(0).length;
 
-            pke.extract(63);
+            double counts[] = new double[spectrumLength - 2];
+            for (int i = 0; i < spectrumLength - 2; ++i) {
+                counts[i] = (i + 2) * result.getFrequencyStep() / WaveletSpectrumTransform.ALPHA;
+            }
 
-            Vector<Vector<Peak>> timePeaks  = pke.getPeaks();
+            WaveletSpectrumTransform noteGetterWithCounts = new WaveletSpectrumTransform(result, counts);
 
-            for (int i = 0; i < timePeaks.size(); ++i) {
-                for (int j = 0; j < timePeaks.elementAt(i).size(); j++) {
-                    Peak temp = timePeaks.elementAt(i).elementAt(j);
-                    outPeaks.println(temp.center + " " + temp.power + " " + temp.powerRel + " " + temp.width);
+            Spectrum subSpectrum2 = noteGetter.spectrumTransform(result);
+
+            power = subSpectrum2.getPowerSpectrum();
+
+            t0 = subSpectrum2.getTimeZeroPoint();
+            nu0 = subSpectrum2.getFrequencyZeroPoint();
+
+            dt = subSpectrum2.getTimeStep();
+            dnu = subSpectrum2.getFrequencyStep();
+            PrintStream outNotes2 = new PrintStream(new File(inputFileName + ".wt2point.dat"));
+
+            for (int i = 0; i < power.size(); ++i) {
+                for (int j = 1; j < power.elementAt(i).length; j++) {
+                    outNotes2.println((i * dt + t0) + "   " + (j * dnu + nu0) + "   " + power.elementAt(i)[j]);
                 }
             }
-            */
 
         } catch (Exception ex) {
             ex.printStackTrace();
