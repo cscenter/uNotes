@@ -6,7 +6,7 @@ import java.util.Vector;
 
 public class PeakCrossExtractor {
 
-    private Vector<double[]> mySpectrum; //todo rename
+    private Vector<double[]> mySpectrum;
     private Vector<Vector<Peak>> myPeaks;
     private double myTimeStep;
     private double myFreqStep;
@@ -19,8 +19,8 @@ public class PeakCrossExtractor {
         myPeaks = new Vector<Vector<Peak>>();
     }
 
-    public void loadRaws(@NotNull Vector<double[]> raws){
-        this.mySpectrum = raws;
+    public void loadSpectrum(@NotNull Vector<double[]> spectrum){
+        this.mySpectrum = spectrum;
     }
 
     public void extract(int slice){

@@ -74,7 +74,7 @@ public class WaveletSpectrumTransformRunner {
             PrintStream outPeaks = new PrintStream(new File(inputFileName + ".pkt.dat"));
             PeakCrossExtractor pke = new PeakCrossExtractor(dt, dnu, 10);
 
-            pke.loadRaws(power);
+            pke.loadSpectrum(power);
 
             pke.extract(63);
 

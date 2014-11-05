@@ -1,55 +1,57 @@
 package conversions;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.Vector;
 
 public class PeakExtractor {
 
-    private Vector<double[]> raws; //todo rename
-    private Vector<Vector<Peak>> peaks;
-    private double timeStep;
-    private double freqStep;
+    private Vector<double[]> mySpectrum;
+    private Vector<Vector<Peak>> myPeaks;
+    private double myTimeStep;
+    private double myFreqStep;
 
     public PeakExtractor(double timeStep, double freqStep){
-        this.timeStep = timeStep;
-        this.freqStep = freqStep;
+        this.myTimeStep = timeStep;
+        this.myFreqStep = freqStep;
     }
 
-    public void loadRaws(Vector<double[]> raws){
-        this.raws = raws;
+    public void loadSpectrum(@NotNull Vector<double[]> spectrum){
+        this.mySpectrum = spectrum;
     }
 
     public void extract(){
-        int fsize = raws.get(0).length; //todo check NPE
-        int tsize = raws.size();
-        int decline = 0;
-        int declineNew = 0; // todo boolean
-        double c_freq = 0;
-        double l_freq = 0;
-        double c_pow = 0;
-        double l_pow = 0;
-        peaks = new Vector<Vector<Peak>>();
-        for (double[] cur : raws) {
-            l_freq = 0;
-            l_pow = cur[0];
-            decline = 0;
+        int fsize = mySpectrum.get(0).length;
+        int tsize = mySpectrum.size();
+        boolean decline = false;
+        boolean declineNew = false;
+        double centralFrequency = 0;
+        double leftFrequency = 0;
+        double centralPower = 0;
+        double leftPower = 0;
+        myPeaks = new Vector<Vector<Peak>>();
+        for (double[] cur : mySpectrum) {
+            leftFrequency = 0;
+            leftPower = cur[0];
+            decline = false;
             Vector<Peak> result_cur = new Vector<Peak>();
-            peaks.add(result_cur);
+            myPeaks.add(result_cur);
             for (int j = 1; j < fsize - 1; ++j) {
                 if ((cur[j - 1] <= cur[j]) && (cur[j + 1] <= cur[j])) {
-                    declineNew = 1;
+                    declineNew = true;
                 }
                 if ((cur[j - 1] >= cur[j]) && (cur[j + 1] >= cur[j])) {
-                    declineNew = 0;
+                    declineNew = false;
                 }
                 if (decline != declineNew) {
-                    if (declineNew == 1) {
-                        c_freq = freqStep * j;
-                        c_pow = cur[j];
+                    if (declineNew) {
+                        centralFrequency = myFreqStep * j;
+                        centralPower = cur[j];
                     } else {
-                        double noise = (l_pow + cur[j]) * 0.5;
-                        result_cur.add(new Peak(c_pow, noise, c_freq, freqStep * j - l_freq));
-                        l_freq = freqStep * j;
-                        l_pow = cur[j];
+                        double noise = (leftPower + cur[j]) * 0.5;
+                        result_cur.add(new Peak(centralPower, noise, centralFrequency, myFreqStep * j - leftFrequency));
+                        leftFrequency = myFreqStep * j;
+                        leftPower = cur[j];
                     }
                     decline = declineNew;
                 }
@@ -58,7 +60,7 @@ public class PeakExtractor {
     }
 
     public Vector<Vector<Peak>> getPeaks(){
-        return peaks;
+        return myPeaks;
     }
 
 }
