@@ -84,7 +84,7 @@ public class WaveletSpectrumTransformRunner {
 
             WaveletSpectrumTransform noteGetterWithCounts = new WaveletSpectrumTransform(result, counts);
 
-            Spectrum subSpectrum2 = noteGetter.spectrumTransform(result);
+            Spectrum subSpectrum2 = noteGetterWithCounts.spectrumTransform(result);
 
             power = subSpectrum2.getPowerSpectrum();
 
