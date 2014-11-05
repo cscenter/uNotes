@@ -54,7 +54,6 @@ public class NoteExtractorRunner {
 
             double dtW = subSpectrum.getTimeStep();
             double dnuW = subSpectrum.getFrequencyStep();
-            //PrintStream outNotes = new PrintStream(new File(inputFileName + ".wt2.dat"));
 
             PrintStream outNotes = new PrintStream(new File(inputFileName + ".npw.dat"));
             PeakCrossExtractor pke = new PeakCrossExtractor(dt, dnu, 10);
