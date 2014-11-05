@@ -5,11 +5,24 @@ public class Peak{
     public double powerRel;
     public double center;
     public double width;
+    public double leftBorder;
+    public double rightBorder;
 
     public Peak(double pow, double powNoise, double center, double width){
         this.power = pow;
         this.powerRel = pow - powNoise;
         this.center = center;
         this.width = width;
+        this.leftBorder = center - width / 2;
+        this.rightBorder = center + width / 2;
+    }
+
+    public Peak(double pow, double leftBorder, double rightBorder){
+        this.power = pow;
+        this.powerRel = pow;
+        this.center = (rightBorder + leftBorder) / 2;
+        this.width = rightBorder - leftBorder;
+        this.leftBorder = leftBorder;
+        this.rightBorder = rightBorder;
     }
 }

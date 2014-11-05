@@ -6,9 +6,6 @@ import org.apache.commons.math3.complex.Complex;
 import java.util.ArrayList;
 import java.util.Vector;
 
-/**
- * Created by User on 22.10.2014.
- */
 public class WaveletSpectrumTransform implements Transformation{
 
     public static final double ALPHA = Math.sqrt(2.0);

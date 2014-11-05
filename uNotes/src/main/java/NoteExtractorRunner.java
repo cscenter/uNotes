@@ -16,7 +16,7 @@ public class NoteExtractorRunner {
         int windowLength = 4096;
 
         File dir = new File("test", "music");
-        String inputFileName = "gvp2.wav";
+        String inputFileName = "gvpm2.wav";
         File in = new File(dir, inputFileName);
 
         System.out.println("uNotes");
@@ -27,6 +27,7 @@ public class NoteExtractorRunner {
             TimeSeries series = new TimeSeries(stream);
             series.start();
 
+            System.out.println("Calculating power spectrum...");
             STFT stft = new STFT(windowLength, timeStepLength, new BlackmanWindow());
             Spectrum result = stft.transform(series);
 
@@ -47,8 +48,9 @@ public class NoteExtractorRunner {
 
             WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result);
 
-            Spectrum subSpectrum = noteGetter.spectrumTransform(result);
+            System.out.println("Calculating wavelet power spectrum...");
 
+            Spectrum subSpectrum = noteGetter.spectrumTransform(result);
             Vector<double[]> wPower = subSpectrum.getPowerSpectrum();
 
             double t0W = subSpectrum.getTimeZeroPoint();
@@ -57,16 +59,18 @@ public class NoteExtractorRunner {
             double dtW = subSpectrum.getTimeStep();
             double dnuW = subSpectrum.getFrequencyStep();
 
+            PrintStream outWavelet = new PrintStream(new File(inputFileName + ".pw.dat"));
+            for (int i = 0; i < wPower.size(); i++) {
+                for (int j = 0; j < wPower.elementAt(i).length; j++) {
+                    outWavelet.println((t0W + i * dtW) + " " + (nu0W + j * dnuW) + " " + wPower.elementAt(i)[j]);
+                }
+            }
+
+
+            System.out.println("Calculating notes...");
             PrintStream outNotes = new PrintStream(new File(inputFileName + ".npw.dat"));
-            PeakCrossExtractor pke = new PeakCrossExtractor(dt, dnu, 10);
 
-            pke.loadSpectrum(power);
-
-            pke.extract(63);
-
-            Vector<Vector<Peak>> timePeaks  = pke.getPeaks();
-
-            noteAlphabet sevenOctaves = new noteAlphabet(7);
+            NoteAlphabet sevenOctaves = new NoteAlphabet(7);
             Vector<Double> notes = sevenOctaves.getFrequenciesPlain();
 
             PeakExtractor pex = new PeakExtractor(dt, dnu);
@@ -76,21 +80,32 @@ public class NoteExtractorRunner {
 
             Vector<double[]> notePower = new Vector<double[]>();
 
+            double powerLevel = 10;  //TODO rename
+            double waveletPowerLevel = 8;  //TODO rename
+            int timeSensitivity = 3;
+
+            //TODO: move this algo to separate class
             for (int i = 0; i < peaks.size(); ++i) {
                 double[] notePowerSlice = new double[notes.size()];
-                for (int j = 0; j < peaks.elementAt(i).size(); j++) {
-                    Peak cur = peaks.elementAt(i).elementAt(j);
-                    if (cur.powerRel > 10 & cur.power > 10 & wPower.elementAt(i)[Math.min((int)(cur.center / dnuW), wPower.size() - 1)] > 10){
+
+                final Vector<Peak> peakSlice = peaks.elementAt(i);
+                for (int j = 0; j < peakSlice.size(); j++) {
+                    Peak currentPeak = peakSlice.elementAt(j);
+                    if (currentPeak.powerRel > powerLevel
+                            && currentPeak.power > powerLevel
+                            && wPower.elementAt(i)[Math.min((int) (currentPeak.center / dnuW), wPower.size() - 1)] > waveletPowerLevel ) {
+                        //Find note by frequency
+                        //TODO move elsewhere
                         double diff = 10000;
                         int noteIndex = 0;
-                        for (int l = 0; l < notes.size(); ++l){
-                            if (Math.abs(notes.elementAt(l) - cur.center) < diff){
+                        for (int l = 0; l < notes.size(); ++l) {
+                            if (Math.abs(notes.elementAt(l) - currentPeak.center) < diff) {
                                 noteIndex = l;
-                                diff = Math.abs(notes.elementAt(l) - cur.center);
+                                diff = Math.abs(notes.elementAt(l) - currentPeak.center);
                             }
                         }
-                        if (notePowerSlice[noteIndex] == 0 | notePowerSlice[noteIndex] < cur.power){
-                            notePowerSlice[noteIndex] = cur.power;
+                        if (notePowerSlice[noteIndex] == 0 || notePowerSlice[noteIndex] < currentPeak.power) {
+                            notePowerSlice[noteIndex] = currentPeak.power;
                         }
                     }
                 }
@@ -103,6 +118,26 @@ public class NoteExtractorRunner {
                     outNotes.print(notePower.elementAt(i)[j] + " ");
                 }
                 outNotes.println();
+            }
+
+
+            PeakCrossExtractor pke = new PeakCrossExtractor(dt, powerLevel, timeSensitivity);
+
+            pke.loadSpectrum(notePower);
+
+            for (int i = 0; i < notePower.elementAt(0).length; i++) {
+                pke.extract(i);
+            }
+
+            Vector<Vector<Peak>> timePeaks = pke.getPeaks();
+            PrintStream outTNotes = new PrintStream(new File(inputFileName + ".nt.dat"));
+            for (int i = 0; i < timePeaks.size(); i++) {
+                outTNotes.println(notes.elementAt(i));
+                for (int j = 0; j < timePeaks.elementAt(i).size(); j++) {
+                    Peak cur = timePeaks.elementAt(i).elementAt(j);
+                    outTNotes.println(cur.leftBorder + " " + cur.rightBorder + " " + cur.power);
+                }
+
             }
 
             for (int i = 0; i < notes.size(); ++i) {

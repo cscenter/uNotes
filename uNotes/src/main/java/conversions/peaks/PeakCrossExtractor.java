@@ -4,81 +4,71 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.Vector;
 
-public class PeakCrossExtractor {
+public class PeakCrossExtractor {   //TODO rename
 
     private Vector<double[]> mySpectrum;
     private Vector<Vector<Peak>> myPeaks;
     private double myTimeStep;
-    private double myFreqStep;
     private double mySensitivity;
+    private int myTimeSensitivity;
 
-    public PeakCrossExtractor(double timeStep, double freqStep, double sensitivity){
+
+    public PeakCrossExtractor(double timeStep, double sensitivity, int timeSensitivity) {
         myTimeStep = timeStep;
-        myFreqStep = freqStep;
         mySensitivity = sensitivity;
         myPeaks = new Vector<Vector<Peak>>();
+        myTimeSensitivity = timeSensitivity;
     }
 
-    public void loadSpectrum(@NotNull Vector<double[]> spectrum){
+    public void loadSpectrum(@NotNull Vector<double[]> spectrum) {
         this.mySpectrum = spectrum;
     }
 
-    public void extract(int slice){
+    //For given number of note (slice) find peaks in its time series
+    public void extract(int slice) {
         int fsize = mySpectrum.size();
+        boolean isNote = false;
         double[] series = new double[fsize];
-        boolean decline = false;
-        boolean declineNew = false;
-        double centralFrequency = 0;
-        double leftFrequency = 0;
+        int leftIndex = 0;
         double centralPower = 0;
-        double leftPower = 0;
-        double lowerPower = -1000;
-        double upperPower = 1000;
+
+        int fallbackCounter = 0;
 
         for (int i = 0; i < fsize; i++) {
             series[i] = mySpectrum.elementAt(i)[slice];
         }
 
-
-        leftFrequency = 0;
-        leftPower = series[0];
-        decline = false;
         Vector<Peak> result_cur = new Vector<Peak>();
         myPeaks.add(result_cur);
-        for (int j = 1; j < fsize - 1; ++j) {
-            if ((series[j - 1] <= series[j]) && (series[j + 1] <= series[j])) {
-                if (decline){
-                    centralFrequency = myTimeStep * j;
+        for (int j = 0; j < fsize; ++j) {
+            if (isNote) {
+                if (series[j] > centralPower) {
                     centralPower = series[j];
                 }
-                if (series[j] - lowerPower > mySensitivity) {
-                    declineNew = true;
-                    upperPower = series[j];
-                }
-            }
-            if ((series[j - 1] >= series[j]) && (series[j + 1] >= series[j])) {
-                if (upperPower - series[j] > mySensitivity) {
-                    declineNew = false;
-                    lowerPower = series[j];
-                }
-            }
-            if (decline != declineNew) {
-                if (declineNew) {
-                    centralFrequency = myTimeStep * j;
-                    centralPower = series[j];
+                if (series[j] <= mySensitivity) {
+                    fallbackCounter++;
                 } else {
-                    double noise = (leftPower + series[j]) * 0.5;
-                    result_cur.add(new Peak(centralPower, noise, centralFrequency, myTimeStep * j - leftFrequency));
-                    leftFrequency = myTimeStep * j;
-                    leftPower = series[j];
+                    fallbackCounter = 0;
                 }
-                decline = declineNew;
+                if (fallbackCounter >= myTimeSensitivity | j == series.length) {
+                    Peak result = new Peak(centralPower, leftIndex * myTimeStep, (j - myTimeSensitivity) * myTimeStep);
+                    if (j - leftIndex - myTimeSensitivity > myTimeSensitivity) {
+                        result_cur.add(result);
+                    }
+                    isNote = false;
+                }
+            } else {
+                if (series[j] > mySensitivity) {
+                    leftIndex = j;
+                    centralPower = series[j];
+                    isNote = true;
+                    fallbackCounter = 0;
+                }
             }
         }
-
     }
 
-    public Vector<Vector<Peak>> getPeaks(){
+    public Vector<Vector<Peak>> getPeaks() {
         return myPeaks;
     }
 

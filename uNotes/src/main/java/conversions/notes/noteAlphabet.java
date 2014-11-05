@@ -2,12 +2,13 @@ package conversions.notes;
 
 import java.util.Vector;
 
-public class noteAlphabet {
+public class NoteAlphabet {
     private Vector<double[]> frequencies;
     private Vector<Double> frequenciesPlain;
 
-
-    public noteAlphabet(int lastOctave){
+    //TODO: constructor(minFreq, maxFreq)
+    //TODO: constructor(minNote, maxNote), class Note
+    public NoteAlphabet(int lastOctave){
         frequencies = new Vector<double[]>();
         frequenciesPlain = new Vector<Double>();
         double freqC7 = 2093.0;

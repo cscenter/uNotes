@@ -4,7 +4,7 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.Vector;
 
-public class PeakExtractor {
+public class PeakExtractor {    //TODO rename
 
     private Vector<double[]> mySpectrum;
     private Vector<Vector<Peak>> myPeaks;
@@ -20,15 +20,16 @@ public class PeakExtractor {
         this.mySpectrum = spectrum;
     }
 
+    //For every time step find peaks in frequency spectrum
     public void extract(){
         int fsize = mySpectrum.get(0).length;
         int tsize = mySpectrum.size();
-        boolean decline = false;
+        boolean decline;
         boolean declineNew = false;
         double centralFrequency = 0;
-        double leftFrequency = 0;
+        double leftFrequency;
         double centralPower = 0;
-        double leftPower = 0;
+        double leftPower;
         myPeaks = new Vector<Vector<Peak>>();
         for (double[] cur : mySpectrum) {
             leftFrequency = 0;
