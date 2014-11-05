@@ -8,7 +8,7 @@ public class PeakExtractor {    //TODO rename
 
     private Vector<double[]> mySpectrum;
     private Vector<Vector<Peak>> myPeaks;
-    private double myTimeStep;
+    private double myTimeStep;  //TODO delete?
     private double myFreqStep;
 
     public PeakExtractor(double timeStep, double freqStep){
@@ -23,7 +23,7 @@ public class PeakExtractor {    //TODO rename
     //For every time step find peaks in frequency spectrum
     public void extract(){
         int fsize = mySpectrum.get(0).length;
-        int tsize = mySpectrum.size();
+
         boolean decline;
         boolean declineNew = false;
         double centralFrequency = 0;

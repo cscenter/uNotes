@@ -9,9 +9,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Vector;
 
-/**
- * Created by User on 21.10.2014.
- */
 public class WaveletSpectrumTransformRunner {
     public static void main(String[] args) {
         int timeStepLength = 256;

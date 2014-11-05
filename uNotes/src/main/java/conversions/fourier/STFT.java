@@ -46,7 +46,6 @@ public class STFT implements Transformation {
         Spectrum currentSpectrum = new Spectrum(new Vector<double[]>(), input.getTimeZeroPoint(), 0.0, timeStep, frequencyStep);
 
         FFT fft = new FFT(myWindowLength);
-        double[] window = myWindow.makeWindow(myWindowLength);
 
         for (int sectionNum = 0; sectionNum < input.getPowerSpectrum().size(); ++sectionNum) {
             double[] re = new double[myWindowLength];
