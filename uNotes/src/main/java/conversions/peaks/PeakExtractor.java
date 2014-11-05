@@ -1,4 +1,4 @@
-package conversions;
+package conversions.peaks;
 
 import com.sun.istack.internal.NotNull;
 

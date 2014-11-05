@@ -1,4 +1,4 @@
-package conversions;
+package conversions.peaks;
 
 import com.sun.istack.internal.NotNull;
 
@@ -63,7 +63,7 @@ public class PeakCrossExtractor {
                 }
             }
             if (decline != declineNew) {
-                if (declineNew == 1) {
+                if (declineNew) {
                     centralFrequency = myTimeStep * j;
                     centralPower = series[j];
                 } else {

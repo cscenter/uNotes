@@ -1,4 +1,6 @@
 import conversions.*;
+import conversions.peaks.*;
+import conversions.notes.*;
 import conversions.fourier.BlackmanWindow;
 import conversions.fourier.STFT;
 
@@ -58,7 +60,7 @@ public class NoteExtractorRunner {
             PrintStream outNotes = new PrintStream(new File(inputFileName + ".npw.dat"));
             PeakCrossExtractor pke = new PeakCrossExtractor(dt, dnu, 10);
 
-            pke.loadRaws(power);
+            pke.loadSpectrum(power);
 
             pke.extract(63);
 
@@ -68,7 +70,7 @@ public class NoteExtractorRunner {
             Vector<Double> notes = sevenOctaves.getFrequenciesPlain();
 
             PeakExtractor pex = new PeakExtractor(dt, dnu);
-            pex.loadRaws(power);
+            pex.loadSpectrum(power);
             pex.extract();
             Vector<Vector<Peak>> peaks = pex.getPeaks();
 
