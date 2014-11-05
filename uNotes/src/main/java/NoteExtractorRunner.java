@@ -17,7 +17,7 @@ public class NoteExtractorRunner {
         int windowLength = 4096;
 
         File dir = new File("test", "music");
-        String inputFileName = "a.wav";
+        String inputFileName = "gvp2.wav";
         File in = new File(dir, inputFileName);
 
         System.out.println("uNotes");
@@ -46,18 +46,18 @@ public class NoteExtractorRunner {
                 }
             }
 
-            /*WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result);
+            WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result);
 
             Spectrum subSpectrum = noteGetter.spectrumTransform(result);
 
             Vector<double[]> wPower = subSpectrum.getPowerSpectrum();
 
-            t0 = subSpectrum.getTimeZeroPoint();
-            nu0 = subSpectrum.getFrequencyZeroPoint();
+            double t0W = subSpectrum.getTimeZeroPoint();
+            double nu0W = subSpectrum.getFrequencyZeroPoint();
 
-            dt = subSpectrum.getTimeStep();
-            dnu = subSpectrum.getFrequencyStep();
-            PrintStream outNotes = new PrintStream(new File(inputFileName + ".wt2.dat"));*/
+            double dtW = subSpectrum.getTimeStep();
+            double dnuW = subSpectrum.getFrequencyStep();
+            //PrintStream outNotes = new PrintStream(new File(inputFileName + ".wt2.dat"));
 
             PrintStream outNotes = new PrintStream(new File(inputFileName + ".npw.dat"));
             PeakCrossExtractor pke = new PeakCrossExtractor(dt, dnu, 10);
@@ -82,7 +82,7 @@ public class NoteExtractorRunner {
                 double[] notePowerSlice = new double[notes.size()];
                 for (int j = 0; j < peaks.elementAt(i).size(); j++) {
                     Peak cur = peaks.elementAt(i).elementAt(j);
-                    if (cur.powerRel > 10){
+                    if (cur.powerRel > 10 & cur.power > 10 & wPower.elementAt(i)[Math.min((int)(cur.center / dnuW), wPower.size() - 1)] > 10){
                         double diff = 10000;
                         int noteIndex = 0;
                         for (int l = 0; l < notes.size(); ++l){
