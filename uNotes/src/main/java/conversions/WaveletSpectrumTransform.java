@@ -102,6 +102,39 @@ public class WaveletSpectrumTransform implements Transformation{
 
     }
 
+    public ArrayList<double[]> spectrumTransgormWithCounts(Spectrum input) {
+
+        ArrayList<double[]> currentSpectrum = new ArrayList<double[]>();
+
+        int scaleLength = myWaveletsArguments.size();
+
+        for (int sectionNum = 0; sectionNum < input.getPowerSpectrum().size(); ++sectionNum) {
+            double[] wav = new double[myWindowLength];
+            double[] scalogramsSection = new double[scaleLength];
+
+            System.arraycopy(input.getPowerSpectrum().elementAt(sectionNum), 0, wav, 0, myWindowLength);
+
+            Complex waveletAmplitude;
+            Complex[] section;
+
+            for (int i = 0; i < scaleLength; ++i) {
+                section = myWavelet.get(i);
+                waveletAmplitude = new Complex(0.0, 0.0);
+                for (int k = 0; k < myWindowLength; ++k) {
+                    Complex arg = new Complex(section[k].getReal(), section[k].getImaginary());
+                    arg = arg.multiply(wav[k]);
+                    waveletAmplitude = waveletAmplitude.add(arg);
+                }
+                waveletAmplitude = waveletAmplitude.divide(myNormalizingFactor[i]);
+
+                scalogramsSection[i] = Math.pow(waveletAmplitude.abs(), 2.0);
+            }
+
+            currentSpectrum.add(scalogramsSection);
+        }
+        return currentSpectrum;
+    }
+
     private void beforeCounting(boolean isModulate) {
 
         int scaleLength = myWindowLength - 2;

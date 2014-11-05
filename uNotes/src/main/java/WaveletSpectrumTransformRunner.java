@@ -6,6 +6,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -68,36 +69,36 @@ public class WaveletSpectrumTransformRunner {
             PrintStream outNotes = new PrintStream(new File(inputFileName + ".wt2.dat"));
 
             for (int i = 0; i < power.size(); ++i) {
-                for (int j = 1; j < power.elementAt(i).length; j++) {
+                for (int j = 0; j < power.elementAt(i).length; j++) {
                     outNotes.println((i * dt + t0) + "   " + (j * dnu + nu0) + "   " + power.elementAt(i)[j]);
                 }
             }
 
             ///////////////////////////////////////////////////////
 
+            double counts[] = new double[]{16.572815184059706, 22.097086912079607, 27.62135864009951,
+                    33.14563036811941, 38.66990209613931, 44.194173824159215, 49.71844555217911};
+
+            /*
             int spectrumLength = result.getPowerSpectrum().elementAt(0).length;
 
             double counts[] = new double[spectrumLength - 2];
             for (int i = 0; i < spectrumLength - 2; ++i) {
                 counts[i] = (i + 2) * result.getFrequencyStep() / WaveletSpectrumTransform.ALPHA;
             }
-
+            */
             WaveletSpectrumTransform noteGetterWithCounts = new WaveletSpectrumTransform(result, counts);
 
-            Spectrum subSpectrum2 = noteGetterWithCounts.spectrumTransform(result);
+            ArrayList<double[]> subSpectrum2 = noteGetterWithCounts.spectrumTransgormWithCounts(result);
 
-            power = subSpectrum2.getPowerSpectrum();
+            t0 = result.getTimeZeroPoint();
+            dt = result.getTimeStep();
 
-            t0 = subSpectrum2.getTimeZeroPoint();
-            nu0 = subSpectrum2.getFrequencyZeroPoint();
-
-            dt = subSpectrum2.getTimeStep();
-            dnu = subSpectrum2.getFrequencyStep();
             PrintStream outNotes2 = new PrintStream(new File(inputFileName + ".wt2point.dat"));
 
-            for (int i = 0; i < power.size(); ++i) {
-                for (int j = 1; j < power.elementAt(i).length; j++) {
-                    outNotes2.println((i * dt + t0) + "   " + (j * dnu + nu0) + "   " + power.elementAt(i)[j]);
+            for (int i = 0; i < subSpectrum2.size(); ++i) {
+                for (int j = 0; j < subSpectrum2.get(i).length; j++) {
+                    outNotes2.println((i * dt + t0) + "   " + counts[j] + "   " + subSpectrum2.get(i)[j]);
                 }
             }
 
