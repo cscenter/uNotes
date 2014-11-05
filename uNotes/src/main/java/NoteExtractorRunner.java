@@ -8,9 +8,6 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Vector;
 
-/**
- * Created by User on 01.11.2014.
- */
 public class NoteExtractorRunner {
     public static void main(String[] args) {
         int timeStepLength = 256;

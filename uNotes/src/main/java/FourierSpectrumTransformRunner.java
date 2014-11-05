@@ -9,9 +9,6 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Vector;
 
-/**
- * Created by User on 25.10.2014.
- */
 public class FourierSpectrumTransformRunner {
     public static void main(String[] args) {
         int timeStepLength = 10000;
