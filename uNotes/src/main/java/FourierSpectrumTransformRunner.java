@@ -7,7 +7,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.io.PrintStream;
-import java.util.Vector;
+import java.util.ArrayList;
 
 public class FourierSpectrumTransformRunner {
     public static void main(String[] args) {
@@ -29,7 +29,7 @@ public class FourierSpectrumTransformRunner {
             STFT stft = new STFT(windowLength, timeStepLength, new BlackmanWindow());
             Spectrum result = stft.transform(series);
 
-            Vector<double[]> power = result.getPowerSpectrum();
+            ArrayList<double[]> power = result.getPowerSpectrum();
 
             double t0 = result.getTimeZeroPoint();
             double nu0 = result.getFrequencyZeroPoint();
@@ -39,8 +39,8 @@ public class FourierSpectrumTransformRunner {
             PrintStream out = new PrintStream(new File(inputFileName + ".power.dat"));
 
             for (int i = 0; i < power.size(); ++i) {
-                for (int j = 0; j < power.elementAt(i).length; j++) {
-                    out.println((i * dt + t0) + "   " + (j * dnu + nu0) + "  " + power.elementAt(i)[j]);
+                for (int j = 0; j < power.get(i).length; j++) {
+                    out.println((i * dt + t0) + "   " + (j * dnu + nu0) + "  " + power.get(i)[j]);
                 }
             }
 
@@ -58,8 +58,8 @@ public class FourierSpectrumTransformRunner {
             PrintStream outNotes = new PrintStream(new File(inputFileName + ".ft2.dat"));
 
             for (int i = 0; i < power.size(); ++i) {
-                for (int j = 1; j < power.elementAt(i).length; j++) {
-                    outNotes.println((i * dt + t0) + "   " + (1.0 / (j * dnu + nu0)) + "  " + power.elementAt(i)[j]);
+                for (int j = 1; j < power.get(i).length; j++) {
+                    outNotes.println((i * dt + t0) + "   " + (1.0 / (j * dnu + nu0)) + "  " + power.get(i)[j]);
                 }
             }
 

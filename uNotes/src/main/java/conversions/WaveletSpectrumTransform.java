@@ -4,8 +4,10 @@ import com.sun.istack.internal.NotNull;
 import org.apache.commons.math3.complex.Complex;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
+/**
+ * Created by User on 22.10.2014.
+ */
 public class WaveletSpectrumTransform implements Transformation{
 
     public static final double ALPHA = Math.sqrt(2.0);
@@ -28,7 +30,7 @@ public class WaveletSpectrumTransform implements Transformation{
 
         int windowLength;
         if (! input.getPowerSpectrum().isEmpty()) {
-             windowLength = input.getPowerSpectrum().elementAt(0).length;
+             windowLength = input.getPowerSpectrum().get(0).length;
         } else return;
 
         myWindowLength = windowLength;
@@ -44,7 +46,7 @@ public class WaveletSpectrumTransform implements Transformation{
 
         int windowLength;
         if (! input.getPowerSpectrum().isEmpty()) {
-            windowLength = input.getPowerSpectrum().elementAt(0).length;
+            windowLength = input.getPowerSpectrum().get(0).length;
         } else return;
 
         myWindowLength = windowLength;
@@ -99,7 +101,7 @@ public class WaveletSpectrumTransform implements Transformation{
 
     }
 
-    public ArrayList<double[]> spectrumTransgormWithCounts(Spectrum input) {
+    public ArrayList<double[]> spectrumTransformWithCounts(Spectrum input) {
 
         ArrayList<double[]> currentSpectrum = new ArrayList<double[]>();
 
@@ -109,7 +111,7 @@ public class WaveletSpectrumTransform implements Transformation{
             double[] wav = new double[myWindowLength];
             double[] scalogramsSection = new double[scaleLength];
 
-            System.arraycopy(input.getPowerSpectrum().elementAt(sectionNum), 0, wav, 0, myWindowLength);
+            System.arraycopy(input.getPowerSpectrum().get(sectionNum), 0, wav, 0, myWindowLength);
 
             Complex waveletAmplitude;
             Complex[] section;
@@ -184,12 +186,13 @@ public class WaveletSpectrumTransform implements Transformation{
         }
     }
 
+    @Override
     public Spectrum spectrumTransform(Spectrum input) {
 
         double scaleStep = input.getFrequencyStep() / ALPHA;
         double timeStep = input.getTimeStep();
 
-        Spectrum currentSpectrum = new Spectrum(new Vector<double[]>(), input.getTimeZeroPoint(),
+        Spectrum currentSpectrum = new Spectrum(new ArrayList<double[]>(), input.getTimeZeroPoint(),
                  2 * input.getFrequencyStep() / ALPHA, timeStep, scaleStep);
 
         int scaleLength = myWaveletsArguments.size();
@@ -198,7 +201,7 @@ public class WaveletSpectrumTransform implements Transformation{
             double[] wav = new double[myWindowLength];
             double[] scalogramsSection = new double[scaleLength];
 
-            System.arraycopy(input.getPowerSpectrum().elementAt(sectionNum), 0, wav, 0, myWindowLength);
+            System.arraycopy(input.getPowerSpectrum().get(sectionNum), 0, wav, 0, myWindowLength);
 
             Complex waveletAmplitude;
             Complex[] section;
@@ -226,7 +229,7 @@ public class WaveletSpectrumTransform implements Transformation{
         double scaleStep = 1.0 / ownSeries.getSampleRate() / ALPHA;
         double timeStep = myTimeStepLength * 1.0 / ownSeries.getSampleRate();
 
-        Spectrum currentSpectrum = new Spectrum(new Vector<double[]>(), myWindowLength / 2.0 / ownSeries.getSampleRate()
+        Spectrum currentSpectrum = new Spectrum(new ArrayList<double[]>(), myWindowLength / 2.0 / ownSeries.getSampleRate()
                 , 0.0, timeStep, scaleStep);
 
         double[] wav = new double[myWindowLength];

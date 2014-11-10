@@ -1,16 +1,15 @@
 package conversions.notes;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
-public class NoteAlphabet {
-    private Vector<double[]> frequencies;
-    private Vector<Double> frequenciesPlain;
+public class noteAlphabet {
+    private ArrayList<double[]> frequencies;
+    private ArrayList<Double> frequenciesPlain;
 
-    //TODO: constructor(minFreq, maxFreq)
-    //TODO: constructor(minNote, maxNote), class Note
-    public NoteAlphabet(int lastOctave){
-        frequencies = new Vector<double[]>();
-        frequenciesPlain = new Vector<Double>();
+
+    public noteAlphabet(int lastOctave){
+        frequencies = new ArrayList<double[]>();
+        frequenciesPlain = new ArrayList<Double>();
         double freqC7 = 2093.0;
         double freqThis = freqC7 / 64;
         double step = Math.pow(2, 1.0 / 12);
@@ -25,11 +24,20 @@ public class NoteAlphabet {
         }
     }
 
-    public Vector<double[]> getFrequencies(){
+    public ArrayList<double[]> getFrequencies(){
         return frequencies;
     }
-    public Vector<Double> getFrequenciesPlain(){
+
+    public ArrayList<Double> getFrequenciesPlain(){
         return frequenciesPlain;
+    }
+
+    public double[] getAllFrequecies() {
+        double[] allFrequencies = new double[frequenciesPlain.size()];
+        for (int i = 0; i < frequenciesPlain.size(); ++i) {
+            allFrequencies[i] = frequenciesPlain.get(i);
+        }
+        return allFrequencies;
     }
 }
 

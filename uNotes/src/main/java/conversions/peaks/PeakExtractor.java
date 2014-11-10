@@ -2,13 +2,13 @@ package conversions.peaks;
 
 import com.sun.istack.internal.NotNull;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
-public class PeakExtractor {    //TODO rename
+public class PeakExtractor {
 
-    private Vector<double[]> mySpectrum;
-    private Vector<Vector<Peak>> myPeaks;
-    private double myTimeStep;  //TODO delete?
+    private ArrayList<double[]> mySpectrum;
+    private ArrayList<ArrayList<Peak>> myPeaks;
+    private double myTimeStep;
     private double myFreqStep;
 
     public PeakExtractor(double timeStep, double freqStep){
@@ -16,26 +16,25 @@ public class PeakExtractor {    //TODO rename
         this.myFreqStep = freqStep;
     }
 
-    public void loadSpectrum(@NotNull Vector<double[]> spectrum){
+    public void loadSpectrum(@NotNull ArrayList<double[]> spectrum){
         this.mySpectrum = spectrum;
     }
 
-    //For every time step find peaks in frequency spectrum
     public void extract(){
         int fsize = mySpectrum.get(0).length;
-
-        boolean decline;
+        int tsize = mySpectrum.size();
+        boolean decline = false;
         boolean declineNew = false;
         double centralFrequency = 0;
-        double leftFrequency;
+        double leftFrequency = 0;
         double centralPower = 0;
-        double leftPower;
-        myPeaks = new Vector<Vector<Peak>>();
+        double leftPower = 0;
+        myPeaks = new ArrayList<ArrayList<Peak>>();
         for (double[] cur : mySpectrum) {
             leftFrequency = 0;
             leftPower = cur[0];
             decline = false;
-            Vector<Peak> result_cur = new Vector<Peak>();
+            ArrayList<Peak> result_cur = new ArrayList<Peak>();
             myPeaks.add(result_cur);
             for (int j = 1; j < fsize - 1; ++j) {
                 if ((cur[j - 1] <= cur[j]) && (cur[j + 1] <= cur[j])) {
@@ -60,7 +59,7 @@ public class PeakExtractor {    //TODO rename
         }
     }
 
-    public Vector<Vector<Peak>> getPeaks(){
+    public ArrayList<ArrayList<Peak>> getPeaks(){
         return myPeaks;
     }
 

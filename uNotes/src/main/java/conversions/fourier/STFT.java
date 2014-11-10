@@ -6,7 +6,7 @@ import conversions.TimeSeries;
 import conversions.Transformation;
 import conversions.fourier.util.FFT;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Short-time Fourier transform
@@ -32,7 +32,7 @@ public class STFT implements Transformation {
 
     public STFT(Spectrum input, @NotNull TimeWindow window) {
         if (! input.getPowerSpectrum().isEmpty()) {
-            myWindowLength = input.getPowerSpectrum().elementAt(0).length;
+            myWindowLength = input.getPowerSpectrum().get(0).length;
         } else return;
 
         myTimeStepLength = 1;
@@ -43,15 +43,16 @@ public class STFT implements Transformation {
         double frequencyStep = 1.0 / myWindowLength / input.getFrequencyStep();
         double timeStep = input.getTimeStep();
 
-        Spectrum currentSpectrum = new Spectrum(new Vector<double[]>(), input.getTimeZeroPoint(), 0.0, timeStep, frequencyStep);
+        Spectrum currentSpectrum = new Spectrum(new ArrayList<double[]>(), input.getTimeZeroPoint(), 0.0, timeStep, frequencyStep);
 
         FFT fft = new FFT(myWindowLength);
+        double[] window = myWindow.makeWindow(myWindowLength);
 
         for (int sectionNum = 0; sectionNum < input.getPowerSpectrum().size(); ++sectionNum) {
             double[] re = new double[myWindowLength];
             double[] im = new double[myWindowLength];
             double[] mag = new double[myWindowLength / 2];
-            System.arraycopy(input.getPowerSpectrum().elementAt(sectionNum), 0, re, 0, myWindowLength);
+            System.arraycopy(input.getPowerSpectrum().get(sectionNum), 0, re, 0, myWindowLength);
 
             fft.transform(re, im);
 
@@ -71,7 +72,7 @@ public class STFT implements Transformation {
         double frequencyStep = ownSeries.getSampleRate() * 1.0 / myWindowLength;
         double timeStep = myTimeStepLength * 1.0 / ownSeries.getSampleRate();
 
-        Spectrum currentSpectrum = new Spectrum(new Vector<double[]>(), myWindowLength / 2.0 / ownSeries.getSampleRate(), 0.0, timeStep, frequencyStep);
+        Spectrum currentSpectrum = new Spectrum(new ArrayList(), myWindowLength / 2.0 / ownSeries.getSampleRate(), 0.0, timeStep, frequencyStep);
 
         FFT fft = new FFT(myWindowLength);
         double[] window = myWindow.makeWindow(myWindowLength);

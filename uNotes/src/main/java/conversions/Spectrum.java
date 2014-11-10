@@ -1,9 +1,9 @@
 package conversions;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 public class Spectrum {
-    private Vector<double[]> myPowerSpectrum;
+    private ArrayList<double[]> myPowerSpectrum;
 
     private double myTimeZeroPoint;
     private double myFrequencyZeroPoint;
@@ -11,7 +11,7 @@ public class Spectrum {
     private double myTimeStep;
     private double myFrequencyStep;
 
-    public Spectrum(Vector<double[]> power, double timeZeroPoint, double frequencyZeroPoint, double timeStep, double frequencyStep) {
+    public Spectrum(ArrayList power, double timeZeroPoint, double frequencyZeroPoint, double timeStep, double frequencyStep) {
         myPowerSpectrum = power;
 
         myTimeZeroPoint = timeZeroPoint;
@@ -25,7 +25,7 @@ public class Spectrum {
         myPowerSpectrum.add(frame);
     }
 
-    public Vector<double[]> getPowerSpectrum() {
+    public ArrayList<double[]> getPowerSpectrum() {
         return myPowerSpectrum;
     }
 
@@ -46,13 +46,13 @@ public class Spectrum {
     }
 
     public void alignment(int localization) {
-        int spectrumSize = myPowerSpectrum.elementAt(0).length;
+        int spectrumSize = myPowerSpectrum.get(0).length;
         int range = spectrumSize / localization; //TODO: NPE
 
         System.out.println(range);
 
         for (int i = 0; i < myPowerSpectrum.size(); ++i) {
-            double[] section = myPowerSpectrum.elementAt(i);
+            double[] section = myPowerSpectrum.get(i);
 
             double[] rangeMean = new double[spectrumSize];
 

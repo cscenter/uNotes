@@ -1,4 +1,6 @@
-import conversions.*;
+import conversions.Spectrum;
+import conversions.TimeSeries;
+import conversions.WaveletSpectrumTransform;
 import conversions.fourier.BlackmanWindow;
 import conversions.fourier.STFT;
 
@@ -7,8 +9,10 @@ import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Vector;
 
+/**
+ * Created by User on 21.10.2014.
+ */
 public class WaveletSpectrumTransformRunner {
     public static void main(String[] args) {
         int timeStepLength = 256;
@@ -29,7 +33,7 @@ public class WaveletSpectrumTransformRunner {
             STFT stft = new STFT(windowLength, timeStepLength, new BlackmanWindow());
             Spectrum result = stft.transform(series);
 
-            Vector<double[]> power = result.getPowerSpectrum();
+            ArrayList<double[]> power = result.getPowerSpectrum();
 
             double t0 = result.getTimeZeroPoint();
             double nu0 = result.getFrequencyZeroPoint();
@@ -43,8 +47,8 @@ public class WaveletSpectrumTransformRunner {
             //
 
             for (int i = 0; i < power.size(); ++i) {
-                for (int j = 0; j < power.elementAt(i).length; j++) {
-                    out.println((i * dt + t0) + "   " + (j * dnu + nu0) + "  " + power.elementAt(i)[j]);
+                for (int j = 0; j < power.get(i).length; j++) {
+                    out.println((i * dt + t0) + "   " + (j * dnu + nu0) + "  " + power.get(i)[j]);
                 }
             }
 
@@ -66,8 +70,8 @@ public class WaveletSpectrumTransformRunner {
             PrintStream outNotes = new PrintStream(new File(inputFileName + ".wt2.dat"));
 
             for (int i = 0; i < power.size(); ++i) {
-                for (int j = 0; j < power.elementAt(i).length; j++) {
-                    outNotes.println((i * dt + t0) + "   " + (j * dnu + nu0) + "   " + power.elementAt(i)[j]);
+                for (int j = 0; j < power.get(i).length; j++) {
+                    outNotes.println((i * dt + t0) + "   " + (j * dnu + nu0) + "   " + power.get(i)[j]);
                 }
             }
 
@@ -86,7 +90,7 @@ public class WaveletSpectrumTransformRunner {
             */
             WaveletSpectrumTransform noteGetterWithCounts = new WaveletSpectrumTransform(result, counts);
 
-            ArrayList<double[]> subSpectrum2 = noteGetterWithCounts.spectrumTransgormWithCounts(result);
+            ArrayList<double[]> subSpectrum2 = noteGetterWithCounts.spectrumTransformWithCounts(result);
 
             t0 = result.getTimeZeroPoint();
             dt = result.getTimeStep();

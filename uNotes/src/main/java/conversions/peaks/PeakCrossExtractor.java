@@ -2,73 +2,83 @@ package conversions.peaks;
 
 import com.sun.istack.internal.NotNull;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
-public class PeakCrossExtractor {   //TODO rename
+public class PeakCrossExtractor {
 
-    private Vector<double[]> mySpectrum;
-    private Vector<Vector<Peak>> myPeaks;
+    private ArrayList<double[]> mySpectrum;
+    private ArrayList<ArrayList<Peak>> myPeaks;
     private double myTimeStep;
+    private double myFreqStep;
     private double mySensitivity;
-    private int myTimeSensitivity;
 
-
-    public PeakCrossExtractor(double timeStep, double sensitivity, int timeSensitivity) {
+    public PeakCrossExtractor(double timeStep, double freqStep, double sensitivity){
         myTimeStep = timeStep;
+        myFreqStep = freqStep;
         mySensitivity = sensitivity;
-        myPeaks = new Vector<Vector<Peak>>();
-        myTimeSensitivity = timeSensitivity;
+        myPeaks = new ArrayList<ArrayList<Peak>>();
     }
 
-    public void loadSpectrum(@NotNull Vector<double[]> spectrum) {
+    public void loadSpectrum(@NotNull ArrayList<double[]> spectrum){
         this.mySpectrum = spectrum;
     }
 
-    //For given number of note (slice) find peaks in its time series
-    public void extract(int slice) {
+    public void extract(int slice){
         int fsize = mySpectrum.size();
-        boolean isNote = false;
         double[] series = new double[fsize];
-        int leftIndex = 0;
+        boolean decline = false;
+        boolean declineNew = false;
+        double centralFrequency = 0;
+        double leftFrequency = 0;
         double centralPower = 0;
-
-        int fallbackCounter = 0;
+        double leftPower = 0;
+        double lowerPower = -1000;
+        double upperPower = 1000;
 
         for (int i = 0; i < fsize; i++) {
-            series[i] = mySpectrum.elementAt(i)[slice];
+            series[i] = mySpectrum.get(i)[slice];
         }
 
-        Vector<Peak> result_cur = new Vector<Peak>();
+
+        leftFrequency = 0;
+        leftPower = series[0];
+        decline = false;
+        ArrayList<Peak> result_cur = new ArrayList<Peak>();
         myPeaks.add(result_cur);
-        for (int j = 0; j < fsize; ++j) {
-            if (isNote) {
-                if (series[j] > centralPower) {
+        for (int j = 1; j < fsize - 1; ++j) {
+            if ((series[j - 1] <= series[j]) && (series[j + 1] <= series[j])) {
+                if (decline){
+                    centralFrequency = myTimeStep * j;
                     centralPower = series[j];
                 }
-                if (series[j] <= mySensitivity) {
-                    fallbackCounter++;
-                } else {
-                    fallbackCounter = 0;
-                }
-                if (fallbackCounter >= myTimeSensitivity | j == series.length) {
-                    Peak result = new Peak(centralPower, leftIndex * myTimeStep, (j - myTimeSensitivity) * myTimeStep);
-                    if (j - leftIndex - myTimeSensitivity > myTimeSensitivity) {
-                        result_cur.add(result);
-                    }
-                    isNote = false;
-                }
-            } else {
-                if (series[j] > mySensitivity) {
-                    leftIndex = j;
-                    centralPower = series[j];
-                    isNote = true;
-                    fallbackCounter = 0;
+                if (series[j] - lowerPower > mySensitivity) {
+                    declineNew = true;
+                    upperPower = series[j];
                 }
             }
+            if ((series[j - 1] >= series[j]) && (series[j + 1] >= series[j])) {
+                if (upperPower - series[j] > mySensitivity) {
+                    declineNew = false;
+                    lowerPower = series[j];
+                }
+            }
+            if (decline != declineNew) {
+                if (declineNew) {
+                    centralFrequency = myTimeStep * j;
+                    centralPower = series[j];
+                } else {
+                    double noise = (leftPower + series[j]) * 0.5;
+                    result_cur.add(new Peak(centralPower, noise, centralFrequency, myTimeStep * j - leftFrequency));
+                    leftFrequency = myTimeStep * j;
+                    leftPower = series[j];
+                }
+                decline = declineNew;
+            }
         }
+
     }
 
-    public Vector<Vector<Peak>> getPeaks() {
+    public ArrayList<ArrayList<Peak>> getPeaks(){
         return myPeaks;
     }
 
