@@ -13,7 +13,6 @@ import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class NoteExtractorRunner {
     public static void main(String[] args) {
@@ -62,16 +61,18 @@ public class NoteExtractorRunner {
             //////
             noteAlphabet sevenOctaves = new noteAlphabet(7);
             ArrayList<Double> notes = sevenOctaves.getFrequenciesPlain();
-
+            ////// In the first place we must to alignment the fourier spectrum
+            result.alignment(20);
+            ////// Then we can make secondary wavelet spectrum in notes frequency, corresponding to sevenOcatves
             WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result, sevenOctaves.getAllFrequecies());
             ArrayList<double[]> wPower = noteGetter.spectrumTransformWithCounts(result);
-
+            //////
             PeakExtractor pex = new PeakExtractor(dt, dnu);
             pex.loadSpectrum(power);
             pex.extract();
             ArrayList<ArrayList<Peak>> peaks = pex.getPeaks();
 
-            Vector<double[]> notePower = new Vector<double[]>();
+            ArrayList<double[]> notePower = new ArrayList<double[]>();
 
             for (int i = 0; i < peaks.size(); ++i) {
                 double[] notePowerSlice = new double[notes.size()];
@@ -102,8 +103,8 @@ public class NoteExtractorRunner {
 
             for (int i = 0; i < notePower.size(); ++i) {
                 outNotes.print(i * dt + " ");
-                for (int j = 0; j < notePower.elementAt(i).length; j++) {
-                    outNotes.print(notePower.elementAt(i)[j] + " ");
+                for (int j = 0; j < notePower.get(i).length; j++) {
+                    outNotes.print(notePower.get(i)[j] + " ");
                 }
                 outNotes.println();
             }
