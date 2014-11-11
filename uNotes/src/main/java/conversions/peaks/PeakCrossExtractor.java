@@ -4,7 +4,7 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
 
-public class PeakCrossExtractor {
+public class PeakCrossExtractor {   //TODO rename
 
     private ArrayList<double[]> mySpectrum;
     private ArrayList<ArrayList<Peak>> myPeaks;
@@ -12,18 +12,18 @@ public class PeakCrossExtractor {
     private double myFreqStep;
     private double mySensitivity;
 
-    public PeakCrossExtractor(double timeStep, double freqStep, double sensitivity){
+    public PeakCrossExtractor(double timeStep, double freqStep, double sensitivity) {
         myTimeStep = timeStep;
         myFreqStep = freqStep;
         mySensitivity = sensitivity;
         myPeaks = new ArrayList<ArrayList<Peak>>();
     }
 
-    public void loadSpectrum(@NotNull ArrayList<double[]> spectrum){
+    public void loadSpectrum(@NotNull ArrayList<double[]> spectrum) {
         this.mySpectrum = spectrum;
     }
 
-    public void extract(int slice){
+    public void extract(int slice) {
         int fsize = mySpectrum.size();
         double[] series = new double[fsize];
         boolean decline = false;
@@ -47,7 +47,7 @@ public class PeakCrossExtractor {
         myPeaks.add(result_cur);
         for (int j = 1; j < fsize - 1; ++j) {
             if ((series[j - 1] <= series[j]) && (series[j + 1] <= series[j])) {
-                if (decline){
+                if (decline) {
                     centralFrequency = myTimeStep * j;
                     centralPower = series[j];
                 }
@@ -78,7 +78,7 @@ public class PeakCrossExtractor {
 
     }
 
-    public ArrayList<ArrayList<Peak>> getPeaks(){
+    public ArrayList<ArrayList<Peak>> getPeaks() {
         return myPeaks;
     }
 

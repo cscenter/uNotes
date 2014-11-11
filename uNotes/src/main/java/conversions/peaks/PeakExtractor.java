@@ -4,23 +4,23 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
 
-public class PeakExtractor {
+public class PeakExtractor {    //TODO rename
 
     private ArrayList<double[]> mySpectrum;
     private ArrayList<ArrayList<Peak>> myPeaks;
     private double myTimeStep;
     private double myFreqStep;
 
-    public PeakExtractor(double timeStep, double freqStep){
+    public PeakExtractor(double timeStep, double freqStep) {
         this.myTimeStep = timeStep;
         this.myFreqStep = freqStep;
     }
 
-    public void loadSpectrum(@NotNull ArrayList<double[]> spectrum){
+    public void loadSpectrum(@NotNull ArrayList<double[]> spectrum) {
         this.mySpectrum = spectrum;
     }
 
-    public void extract(){
+    public void extract() {
         int fsize = mySpectrum.get(0).length;
         int tsize = mySpectrum.size();
         boolean decline = false;
@@ -59,7 +59,7 @@ public class PeakExtractor {
         }
     }
 
-    public ArrayList<ArrayList<Peak>> getPeaks(){
+    public ArrayList<ArrayList<Peak>> getPeaks() {
         return myPeaks;
     }
 

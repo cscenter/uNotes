@@ -1,6 +1,6 @@
 package conversions.peaks;
 
-public class Peak{
+public class Peak {
     public double power;
     public double powerRel;
     public double center;
@@ -8,7 +8,7 @@ public class Peak{
     public double leftBorder;
     public double rightBorder;
 
-    public Peak(double pow, double powNoise, double center, double width){
+    public Peak(double pow, double powNoise, double center, double width) {
         this.power = pow;
         this.powerRel = pow - powNoise;
         this.center = center;
@@ -17,7 +17,7 @@ public class Peak{
         this.rightBorder = center + width / 2;
     }
 
-    public Peak(double pow, double leftBorder, double rightBorder){
+    public Peak(double pow, double leftBorder, double rightBorder) {
         this.power = pow;
         this.powerRel = pow;
         this.center = (rightBorder + leftBorder) / 2;

@@ -31,7 +31,7 @@ public class STFT implements Transformation {
     }
 
     public STFT(Spectrum input, @NotNull TimeWindow window) {
-        if (! input.getPowerSpectrum().isEmpty()) {
+        if (!input.getPowerSpectrum().isEmpty()) {
             myWindowLength = input.getPowerSpectrum().get(0).length;
         } else return;
 
@@ -46,7 +46,6 @@ public class STFT implements Transformation {
         Spectrum currentSpectrum = new Spectrum(new ArrayList<double[]>(), input.getTimeZeroPoint(), 0.0, timeStep, frequencyStep);
 
         FFT fft = new FFT(myWindowLength);
-        double[] window = myWindow.makeWindow(myWindowLength);
 
         for (int sectionNum = 0; sectionNum < input.getPowerSpectrum().size(); ++sectionNum) {
             double[] re = new double[myWindowLength];
@@ -72,7 +71,7 @@ public class STFT implements Transformation {
         double frequencyStep = ownSeries.getSampleRate() * 1.0 / myWindowLength;
         double timeStep = myTimeStepLength * 1.0 / ownSeries.getSampleRate();
 
-        Spectrum currentSpectrum = new Spectrum(new ArrayList(), myWindowLength / 2.0 / ownSeries.getSampleRate(), 0.0, timeStep, frequencyStep);
+        Spectrum currentSpectrum = new Spectrum(new ArrayList<double[]>(), myWindowLength / 2.0 / ownSeries.getSampleRate(), 0.0, timeStep, frequencyStep);
 
         FFT fft = new FFT(myWindowLength);
         double[] window = myWindow.makeWindow(myWindowLength);

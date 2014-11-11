@@ -11,7 +11,7 @@ public class Spectrum {
     private double myTimeStep;
     private double myFrequencyStep;
 
-    public Spectrum(ArrayList power, double timeZeroPoint, double frequencyZeroPoint, double timeStep, double frequencyStep) {
+    public Spectrum(ArrayList<double[]> power, double timeZeroPoint, double frequencyZeroPoint, double timeStep, double frequencyStep) {
         myPowerSpectrum = power;
 
         myTimeZeroPoint = timeZeroPoint;
@@ -51,9 +51,7 @@ public class Spectrum {
 
         System.out.println(range);
 
-        for (int i = 0; i < myPowerSpectrum.size(); ++i) {
-            double[] section = myPowerSpectrum.get(i);
-
+        for (double[] section : myPowerSpectrum) {
             double[] rangeMean = new double[spectrumSize];
 
             for (int k = 0; k < range; ++k) {

@@ -9,9 +9,6 @@ import conversions.peaks.PeakExtractor;
 import javax.sound.sampled.AudioInputStream;
 import java.util.ArrayList;
 
-/**
- * Created by User on 11.11.2014.
- */
 public class NotePowerGenerator {
     public ArrayList<double[]> getNotePower(AudioInputStream inputStream, int windowLength, int timeStepLength) {
 

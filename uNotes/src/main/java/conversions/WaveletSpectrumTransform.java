@@ -5,9 +5,6 @@ import org.apache.commons.math3.complex.Complex;
 
 import java.util.ArrayList;
 
-/**
- * Created by User on 22.10.2014.
- */
 public class WaveletSpectrumTransform implements Transformation{
 
     public static final double ALPHA = Math.sqrt(2.0);
@@ -69,10 +66,10 @@ public class WaveletSpectrumTransform implements Transformation{
         myWaveletsArguments = new ArrayList<double[]>();
         int timeShift = myWindowLength / 2;
 
-        for (int i = 0; i < countsLength; ++i) {
+        for (double count : counts) {
             double[] arguments = new double[myWindowLength];
             for (int k = 0; k < myWindowLength; ++k) {
-                arguments[k] = (k - timeShift) * frequencyStep / counts[i];
+                arguments[k] = (k - timeShift) * frequencyStep / count;
             }
             myWaveletsArguments.add(arguments);
         }
