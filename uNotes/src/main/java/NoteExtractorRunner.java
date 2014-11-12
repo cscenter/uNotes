@@ -19,9 +19,10 @@ public class NoteExtractorRunner {
         int timeStepLength = 256;
         int windowLength = 4096;
 
-        File dir = new File("test", "music");
+        File inputDir = new File("test", "music");
+        File outputDir = new File("test", "output");
         String inputFileName = "gvp2.wav";
-        File in = new File(dir, inputFileName);
+        File in = new File(inputDir, inputFileName);
 
         System.out.println("uNotes");
 
@@ -41,7 +42,7 @@ public class NoteExtractorRunner {
 
             double dt = result.getTimeStep();
             double dnu = result.getFrequencyStep();
-            PrintStream out = new PrintStream(new File(inputFileName + ".power.dat"));
+            PrintStream out = new PrintStream(new File(outputDir, inputFileName + ".power.dat"));
 
             for (int i = 0; i < power.size(); ++i) {
                 for (int j = 0; j < power.get(i).length; j++) {
@@ -49,7 +50,7 @@ public class NoteExtractorRunner {
                 }
             }
 
-            PrintStream outNotes = new PrintStream(new File(inputFileName + ".npw.dat"));
+            PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".npw.dat"));
             ///////TODO: what is pke?
             PeakCrossExtractor pke = new PeakCrossExtractor(dt, dnu, 10);
 
@@ -57,7 +58,7 @@ public class NoteExtractorRunner {
 
             pke.extract(63);
 
-            ArrayList<ArrayList<Peak>> timePeaks  = pke.getPeaks();
+            ArrayList<ArrayList<Peak>> timePeaks = pke.getPeaks();
             //////
             noteAlphabet sevenOctaves = new noteAlphabet(7);
             ArrayList<Double> notes = sevenOctaves.getFrequenciesPlain();
@@ -79,21 +80,21 @@ public class NoteExtractorRunner {
                 for (int j = 0; j < peaks.get(i).size(); j++) {
                     Peak cur = peaks.get(i).get(j);
                     //if (cur.powerRel > 10 & cur.power > 10 & wPower.get(i)[Math.min((int)(cur.center / dnuW), wPower.size() - 1)] > 10){
-                    if (cur.powerRel > 10 & cur.power > 10){
+                    if (cur.powerRel > 10 & cur.power > 10) {
                         double diff = 10000;
                         int noteIndex = 0;
-                        for (int l = 0; l < notes.size(); ++l){
-                            if (Math.abs(notes.get(l) - cur.center) < diff){
+                        for (int l = 0; l < notes.size(); ++l) {
+                            if (Math.abs(notes.get(l) - cur.center) < diff) {
                                 noteIndex = l;
                                 diff = Math.abs(notes.get(l) - cur.center);
                             }
                         }
 
-                        if (wPower.get(i)[noteIndex] < 10){
+                        if (wPower.get(i)[noteIndex] < 10) {
                             continue;
                         }
 
-                        if (notePowerSlice[noteIndex] == 0 | notePowerSlice[noteIndex] < cur.power){
+                        if (notePowerSlice[noteIndex] == 0 || notePowerSlice[noteIndex] < cur.power) {
                             notePowerSlice[noteIndex] = cur.power;
                         }
                     }

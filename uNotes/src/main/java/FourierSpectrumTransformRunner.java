@@ -14,9 +14,10 @@ public class FourierSpectrumTransformRunner {
         int timeStepLength = 10000;
         int windowLength = 512;
 
-        File dir = new File("test", "music");
+        File inputDir = new File("test", "music");
+        File outputDir = new File("test", "output");
         String inputFileName = "a.wav";
-        File in = new File(dir, inputFileName);
+        File in = new File(inputDir, inputFileName);
 
         System.out.println("uNotes");
 
@@ -36,7 +37,7 @@ public class FourierSpectrumTransformRunner {
 
             double dt = result.getTimeStep();
             double dnu = result.getFrequencyStep();
-            PrintStream out = new PrintStream(new File(inputFileName + ".power.dat"));
+            PrintStream out = new PrintStream(new File(outputDir, inputFileName + ".power.dat"));
 
             for (int i = 0; i < power.size(); ++i) {
                 for (int j = 0; j < power.get(i).length; j++) {
@@ -55,7 +56,7 @@ public class FourierSpectrumTransformRunner {
 
             dt = subSpectrum.getTimeStep();
             dnu = subSpectrum.getFrequencyStep();
-            PrintStream outNotes = new PrintStream(new File(inputFileName + ".ft2.dat"));
+            PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".ft2.dat"));
 
             for (int i = 0; i < power.size(); ++i) {
                 for (int j = 1; j < power.get(i).length; j++) {

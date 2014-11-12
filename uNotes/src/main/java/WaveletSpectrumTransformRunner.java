@@ -15,9 +15,10 @@ public class WaveletSpectrumTransformRunner {
         int timeStepLength = 256;
         int windowLength = 2048;
 
-        File dir = new File("test", "music");
+        File inputDir = new File("test", "music");
+        File outputDir = new File("test", "output");
         String inputFileName = "a.wav";
-        File in = new File(dir, inputFileName);
+        File in = new File(inputDir, inputFileName);
 
         System.out.println("uNotes");
 
@@ -37,7 +38,7 @@ public class WaveletSpectrumTransformRunner {
 
             double dt = result.getTimeStep();
             double dnu = result.getFrequencyStep();
-            PrintStream out = new PrintStream(new File(inputFileName + ".power.dat"));
+            PrintStream out = new PrintStream(new File(outputDir, inputFileName + ".power.dat"));
 
             //
             //result.alignment(20);
@@ -64,7 +65,7 @@ public class WaveletSpectrumTransformRunner {
 
             dt = subSpectrum.getTimeStep();
             dnu = subSpectrum.getFrequencyStep();
-            PrintStream outNotes = new PrintStream(new File(inputFileName + ".wt2.dat"));
+            PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".wt2.dat"));
 
             for (int i = 0; i < power.size(); ++i) {
                 for (int j = 0; j < power.get(i).length; j++) {
