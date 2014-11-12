@@ -5,7 +5,6 @@ import com.sun.istack.internal.NotNull;
 import javax.sound.midi.*;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -68,11 +67,11 @@ public class NoteSequence {
             MidiEvent event = myTrack.get(i);
             int currIndex = (new Double(event.getTick() * step)).intValue();
             for (int j = prevIndex; j < currIndex; j++) {
-                double[] t = new double[128];
+                double[] notesArray = new double[128];
                 for (Integer note : currentNotes) {
-                    t[note] = 1;    //Mark note as playing
+                    notesArray[note] = 1;    //Mark note as playing
                 }
-                result.add(t);
+                result.add(notesArray);
             }
             prevIndex = currIndex;
 

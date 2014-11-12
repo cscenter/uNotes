@@ -41,7 +41,7 @@ public class NoteAlphabet { //TODO use MIDI codes
     }
 
     /**
-     * @param frequency
+     * @param frequency frequency of note
      * @return MIDI code of nearest note
      */
     public static int getMIDICode(double frequency) {   //TODO move in separate class
