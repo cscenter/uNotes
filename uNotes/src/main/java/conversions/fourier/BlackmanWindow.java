@@ -10,7 +10,7 @@ public class BlackmanWindow implements TimeWindow {
         double[] window = new double[size];
         for (int i = 0; i < size; ++i) {
             window[i] = 0.42 - 0.5 * Math.cos(2 * Math.PI * i / (size - 1))
-                        + 0.08 * Math.cos(4 * Math.PI * i / (size - 1));
+                    + 0.08 * Math.cos(4 * Math.PI * i / (size - 1));
         }
 
         return window;

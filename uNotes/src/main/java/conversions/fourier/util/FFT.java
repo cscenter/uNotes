@@ -11,7 +11,7 @@ public final class FFT {
 
     public FFT(int n) {
         // Make sure n is a power of 2
-        if(n<=0 || (n&(n-1))!=0){
+        if (n <= 0 || (n & (n - 1)) != 0) {
             throw new IllegalArgumentException("Array length for FFT must be power of 2");
         }
 

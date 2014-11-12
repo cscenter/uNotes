@@ -5,7 +5,7 @@ import org.apache.commons.math3.complex.Complex;
 
 import java.util.ArrayList;
 
-public class WaveletSpectrumTransform implements Transformation{
+public class WaveletSpectrumTransform implements Transformation {
 
     public static final double ALPHA = Math.sqrt(2.0);
     private static final double B = 2.0;
@@ -23,11 +23,11 @@ public class WaveletSpectrumTransform implements Transformation{
         beforeCounting(true);
     }
 
-    public WaveletSpectrumTransform(@NotNull Spectrum input){
+    public WaveletSpectrumTransform(@NotNull Spectrum input) {
 
         int windowLength;
-        if (! input.getPowerSpectrum().isEmpty()) {
-             windowLength = input.getPowerSpectrum().get(0).length;
+        if (!input.getPowerSpectrum().isEmpty()) {
+            windowLength = input.getPowerSpectrum().get(0).length;
         } else return;
 
         myWindowLength = windowLength;
@@ -42,7 +42,7 @@ public class WaveletSpectrumTransform implements Transformation{
         }
 
         int windowLength;
-        if (! input.getPowerSpectrum().isEmpty()) {
+        if (!input.getPowerSpectrum().isEmpty()) {
             windowLength = input.getPowerSpectrum().get(0).length;
         } else return;
 
@@ -190,7 +190,7 @@ public class WaveletSpectrumTransform implements Transformation{
         double timeStep = input.getTimeStep();
 
         Spectrum currentSpectrum = new Spectrum(new ArrayList<double[]>(), input.getTimeZeroPoint(),
-                 2 * input.getFrequencyStep() / ALPHA, timeStep, scaleStep);
+                2 * input.getFrequencyStep() / ALPHA, timeStep, scaleStep);
 
         int scaleLength = myWaveletsArguments.size();
 
