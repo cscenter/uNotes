@@ -16,6 +16,7 @@ public class FourierSpectrumTransformRunner {
 
         File inputDir = new File("test", "music");
         File outputDir = new File("test", "output");
+        outputDir.mkdir();
         String inputFileName = "a.wav";
         File in = new File(inputDir, inputFileName);
 

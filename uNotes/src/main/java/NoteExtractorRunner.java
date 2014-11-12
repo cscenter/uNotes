@@ -21,6 +21,8 @@ public class NoteExtractorRunner {
 
         File inputDir = new File("test", "music");
         File outputDir = new File("test", "output");
+        outputDir.mkdir();
+
         String inputFileName = "gvp2.wav";
         File in = new File(inputDir, inputFileName);
 
