@@ -3,7 +3,7 @@ import conversions.TimeSeries;
 import conversions.WaveletSpectrumTransform;
 import conversions.fourier.BlackmanWindow;
 import conversions.fourier.STFT;
-import conversions.notes.noteAlphabet;
+import conversions.notes.NoteAlphabet;
 import conversions.peaks.Peak;
 import conversions.peaks.PeakCrossExtractor;
 import conversions.peaks.PeakExtractor;
@@ -60,12 +60,12 @@ public class NoteExtractorRunner {
 
             ArrayList<ArrayList<Peak>> timePeaks = pke.getPeaks();
             //////
-            noteAlphabet sevenOctaves = new noteAlphabet(7);
+            NoteAlphabet sevenOctaves = new NoteAlphabet(7);
             ArrayList<Double> notes = sevenOctaves.getFrequenciesPlain();
             ////// In the first place we must to alignment the fourier spectrum
             result.alignment(20);
-            ////// Then we can make secondary wavelet spectrum in notes frequency, corresponding to sevenOcatves
-            WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result, sevenOctaves.getAllFrequecies());
+            ////// Then we can make secondary wavelet spectrum in notes frequency, corresponding to sevenOctaves
+            WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result, sevenOctaves.getAllFrequencies());
             ArrayList<double[]> wPower = noteGetter.spectrumTransformWithCounts(result);
             //////
             PeakExtractor pex = new PeakExtractor(dt, dnu);

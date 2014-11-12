@@ -2,7 +2,7 @@ package conversions;
 
 import conversions.fourier.BlackmanWindow;
 import conversions.fourier.STFT;
-import conversions.notes.noteAlphabet;
+import conversions.notes.NoteAlphabet;
 import conversions.peaks.Peak;
 import conversions.peaks.PeakExtractor;
 
@@ -20,20 +20,17 @@ public class NotePowerGenerator {
 
         ArrayList<double[]> power = result.getPowerSpectrum();
 
-        double t0 = result.getTimeZeroPoint();
-        double nu0 = result.getFrequencyZeroPoint();
-
         double dt = result.getTimeStep();
         double dnu = result.getFrequencyStep();
 
-        noteAlphabet sevenOctaves = new noteAlphabet(7);
+        NoteAlphabet sevenOctaves = new NoteAlphabet(7);
         ArrayList<Double> notes = sevenOctaves.getFrequenciesPlain();
-        ////// In the first place we must to alignment the fourier spectrum
+        // At first we must align the fourier spectrum
         result.alignment(20);
-        ////// Then we can make secondary wavelet spectrum in notes frequency, corresponding to sevenOcatves
-        WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result, sevenOctaves.getAllFrequecies());
+        // Then we can make secondary wavelet spectrum in notes frequencies, corresponding to sevenOctaves
+        WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result, sevenOctaves.getAllFrequencies());
         ArrayList<double[]> wPower = noteGetter.spectrumTransformWithCounts(result);
-        //////
+
         PeakExtractor pex = new PeakExtractor(dt, dnu);
         pex.loadSpectrum(power);
         pex.extract();
@@ -45,9 +42,8 @@ public class NotePowerGenerator {
             double[] notePowerSlice = new double[notes.size()];
             for (int j = 0; j < peaks.get(i).size(); j++) {
                 Peak cur = peaks.get(i).get(j);
-                //if (cur.powerRel > 10 & cur.power > 10 & wPower.get(i)[Math.min((int)(cur.center / dnuW), wPower.size() - 1)] > 10){
                 if (cur.powerRel > 10 & cur.power > 10) {
-                    double diff = 10000;
+                    double diff = Double.MAX_VALUE;
                     int noteIndex = 0;
                     for (int l = 0; l < notes.size(); ++l) {
                         if (Math.abs(notes.get(l) - cur.center) < diff) {
@@ -60,7 +56,7 @@ public class NotePowerGenerator {
                         continue;
                     }
 
-                    if (notePowerSlice[noteIndex] == 0 | notePowerSlice[noteIndex] < cur.power) {
+                    if (notePowerSlice[noteIndex] == 0 || notePowerSlice[noteIndex] < cur.power) {
                         notePowerSlice[noteIndex] = cur.power;
                     }
                 }
