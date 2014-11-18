@@ -1,5 +1,7 @@
 package conversions;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.ArrayList;
 
 public class Spectrum {
@@ -11,7 +13,7 @@ public class Spectrum {
     private double myTimeStep;
     private double myFrequencyStep;
 
-    public Spectrum(ArrayList<double[]> power, double timeZeroPoint, double frequencyZeroPoint, double timeStep, double frequencyStep) {
+    public Spectrum(@NotNull ArrayList<double[]> power, double timeZeroPoint, double frequencyZeroPoint, double timeStep, double frequencyStep) {
         myPowerSpectrum = power;
 
         myTimeZeroPoint = timeZeroPoint;
@@ -47,7 +49,7 @@ public class Spectrum {
 
     public void alignment(int localization) {
         int spectrumSize = myPowerSpectrum.get(0).length;
-        int range = spectrumSize / localization; //TODO: NPE
+        int range = spectrumSize / localization;
 
         System.out.println(range);
 
