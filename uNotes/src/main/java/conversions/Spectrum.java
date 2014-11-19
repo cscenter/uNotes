@@ -49,8 +49,14 @@ public class Spectrum {
         return myFrequencyStep;
     }
 
-    public ArrayList<double[]> getAignmentPowerSpectrum() {
-        ArrayList<double[]> alignmentPowerSpectrum = new ArrayList<double[]>();
+    /**
+     * This method aligns myPowerSpectrum.
+     * For each frequency at given time we subtract from its power the mean power of its neighbours
+     * It will save harmonic components in spectrum and filter trend.
+     * @return alignedPowerSpectrum
+     */
+    public ArrayList<double[]> getAlignedPowerSpectrum() {
+        ArrayList<double[]> alignedPowerSpectrum = new ArrayList<double[]>();
 
         int spectrumSize = myPowerSpectrum.get(0).length;
         int range = spectrumSize / ALIGNMENT_LOCALIZATION_FACTOR;
@@ -89,16 +95,16 @@ public class Spectrum {
             }
             //////////
 
-            double[] alignmentSection = new double[spectrumSize];
+            double[] alignedSection = new double[spectrumSize];
 
             for (int k = 0; k < spectrumSize; ++k) {
-                alignmentSection[k] = section[k] - rangeMean[k];
+                alignedSection[k] = section[k] - rangeMean[k];
             }
 
-            alignmentPowerSpectrum.add(i, alignmentSection);
+            alignedPowerSpectrum.add(i, alignedSection);
         }
 
-        return alignmentPowerSpectrum;
+        return alignedPowerSpectrum;
     }
 
 }

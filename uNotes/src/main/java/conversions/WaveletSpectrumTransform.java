@@ -99,7 +99,7 @@ public class WaveletSpectrumTransform implements Transformation {
     }
 
     public ArrayList<double[]> spectrumTransformWithCounts(Spectrum input) {
-        ArrayList<double[]> alignmentInputSpectrum = input.getAignmentPowerSpectrum();
+        ArrayList<double[]> alignmentInputSpectrum = input.getAlignedPowerSpectrum();
 
         ArrayList<double[]> currentSpectrum = new ArrayList<double[]>();
 

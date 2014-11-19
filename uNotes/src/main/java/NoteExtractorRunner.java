@@ -1,4 +1,4 @@
-import conversions.NotePowerGenerator;
+import conversions.QuasiNotes;
 import conversions.Spectrum;
 import conversions.TimeSeries;
 import conversions.fourier.BlackmanWindow;
@@ -57,8 +57,8 @@ public class NoteExtractorRunner {
 
 
             //  Search notes from C0 to B6
-            NotePowerGenerator notePowerGenerator = new NotePowerGenerator(spectrum, 2 * 12, 9 * 12 - 1);
-            ArrayList<double[]> notePower = notePowerGenerator.getNotePowerSeries();
+            QuasiNotes quasiNotes = new QuasiNotes(spectrum, 2 * 12, 9 * 12 - 1);
+            ArrayList<double[]> notePower = quasiNotes.getNotePowerSeries();
             for (int i = 0; i < notePower.size(); ++i) {
                 outNotes.print(i * dt + " ");
                 for (int j = 0; j < notePower.get(i).length; j++) {

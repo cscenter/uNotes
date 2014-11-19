@@ -7,17 +7,17 @@ import conversions.peaks.PeakExtractor;
 
 import java.util.ArrayList;
 
-public class NotePowerGenerator {   //TODO rename
+public class QuasiNotes {   //TODO rename
     private int myMinMidiCode;
     private int myMaxMidiCode;
     private double myTimeStep;
     private ArrayList<double[]> myNotePowerSeries = new ArrayList<double[]>();
 
-    public NotePowerGenerator(Spectrum spectrum) {
+    public QuasiNotes(Spectrum spectrum) {
         this(spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE);   //all MIDI notes (from C-1 to G9)
     }
 
-    public NotePowerGenerator(Spectrum spectrum, int minMidiCode, int maxMidiCode) {
+    public QuasiNotes(Spectrum spectrum, int minMidiCode, int maxMidiCode) {
         myMinMidiCode = minMidiCode;
         myMaxMidiCode = maxMidiCode;
         myTimeStep = spectrum.getTimeStep();
