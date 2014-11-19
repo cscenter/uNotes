@@ -62,8 +62,8 @@ public class NoteExtractorRunner {
 
             ArrayList<ArrayList<Peak>> timePeaks = pke.getPeaks();
             //////
-            NoteAlphabet sevenOctaves = new NoteAlphabet(7);
-            ArrayList<Double> notes = sevenOctaves.getFrequenciesPlain();
+            NoteAlphabet sevenOctaves = new NoteAlphabet(2 * 12, 9 * 12 - 1);   //From C0 to B6
+            ArrayList<Double> notes = sevenOctaves.getFrequencies();
             ////// In the first place we must to alignment the fourier spectrum
             result.alignment(20);
             ////// Then we can make secondary wavelet spectrum in notes frequency, corresponding to sevenOctaves

@@ -23,8 +23,8 @@ public class NotePowerGenerator {
         double dt = result.getTimeStep();
         double dnu = result.getFrequencyStep();
 
-        NoteAlphabet sevenOctaves = new NoteAlphabet(7);
-        ArrayList<Double> notes = sevenOctaves.getFrequenciesPlain();
+        NoteAlphabet sevenOctaves = new NoteAlphabet(2 * 12, 9 * 12 - 1);   //From C0 to B6
+        ArrayList<Double> notes = sevenOctaves.getFrequencies();
         // At first we must align the fourier spectrum
         result.alignment(20);
         // Then we can make secondary wavelet spectrum in notes frequencies, corresponding to sevenOctaves

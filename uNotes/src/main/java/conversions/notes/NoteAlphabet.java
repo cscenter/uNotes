@@ -3,39 +3,46 @@ package conversions.notes;
 import java.util.ArrayList;
 
 public class NoteAlphabet { //TODO use MIDI codes
-    private ArrayList<double[]> frequencies;
-    private ArrayList<Double> frequenciesPlain;
+    private ArrayList<Double> myFrequencies;
 
-
+    @Deprecated
     public NoteAlphabet(int lastOctave) {
-        frequencies = new ArrayList<double[]>();
-        frequenciesPlain = new ArrayList<Double>();
-        double freqC7 = 2093.0;
-        double freqThis = freqC7 / 64;
-        double step = Math.pow(2, 1.0 / 12);
-        for (int i = 0; i < lastOctave; ++i) {
-            double[] octave = new double[12];
-            for (int j = 0; j < 12; ++j) {
-                octave[j] = freqThis;
-                frequenciesPlain.add(freqThis);
-                freqThis *= step;
-            }
-            frequencies.add(octave);
+        //notes from C0 to B(lastOctave)
+        this(2 * 12, (lastOctave + 2) * 12 - 1);
+    }
+
+    /**
+     * builds frequencies from minMidiCode to maxMidiCode
+     *
+     * @param minMidiCode MIDI code of the lowest note (C-1 note has code 0)
+     * @param maxMidiCode MIDI code of the highest note (C-1 note has code 0)
+     */
+    public NoteAlphabet(int minMidiCode, int maxMidiCode) {
+        if (minMidiCode < 0) {
+            throw new IllegalArgumentException("minMidiCode must be >=0");
+        }
+        if (maxMidiCode > 127) {
+            throw new IllegalArgumentException("maxMidiCode must be <=127");
+        }
+        if (minMidiCode > maxMidiCode) {
+            throw new IllegalArgumentException("minMidiCode is greater than maxMidiCode");
+        }
+
+        myFrequencies = new ArrayList<Double>(maxMidiCode - minMidiCode + 1);
+        for (int i = minMidiCode; i <= maxMidiCode; i++) {
+            myFrequencies.add(getMIDIFrequency(i));
         }
     }
 
-    public ArrayList<double[]> getFrequencies() {
-        return frequencies;
-    }
 
-    public ArrayList<Double> getFrequenciesPlain() {
-        return frequenciesPlain;
+    public ArrayList<Double> getFrequencies() {
+        return myFrequencies;
     }
 
     public double[] getAllFrequencies() {
-        double[] allFrequencies = new double[frequenciesPlain.size()];
-        for (int i = 0; i < frequenciesPlain.size(); ++i) {
-            allFrequencies[i] = frequenciesPlain.get(i);
+        double[] allFrequencies = new double[myFrequencies.size()];
+        for (int i = 0; i < myFrequencies.size(); ++i) {
+            allFrequencies[i] = myFrequencies.get(i);
         }
         return allFrequencies;
     }
@@ -56,6 +63,6 @@ public class NoteAlphabet { //TODO use MIDI codes
      */
     public static double getMIDIFrequency(int midiCode) {   //TODO move in separate class
         double pitchA4 = 440;
-        return pitchA4 * Math.pow(2, (midiCode - 69) / 12);
+        return pitchA4 * Math.pow(2, (midiCode - 69) / 12.0);
     }
 }
