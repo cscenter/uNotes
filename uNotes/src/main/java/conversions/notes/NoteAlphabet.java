@@ -2,8 +2,10 @@ package conversions.notes;
 
 import java.util.ArrayList;
 
-public class NoteAlphabet { //TODO use MIDI codes
-    private ArrayList<Double> myFrequencies;
+public final class NoteAlphabet { //TODO use MIDI codes
+    private ArrayList<Double> myFrequencies;    //TODO double[] ?
+    private int myMinMidiCode;
+    private int myMaxMidiCode;
 
     @Deprecated
     public NoteAlphabet(int lastOctave) {
@@ -28,6 +30,9 @@ public class NoteAlphabet { //TODO use MIDI codes
             throw new IllegalArgumentException("minMidiCode is greater than maxMidiCode");
         }
 
+        myMinMidiCode = minMidiCode;
+        myMaxMidiCode = maxMidiCode;
+
         myFrequencies = new ArrayList<Double>(maxMidiCode - minMidiCode + 1);
         for (int i = minMidiCode; i <= maxMidiCode; i++) {
             myFrequencies.add(getMIDIFrequency(i));
@@ -35,8 +40,9 @@ public class NoteAlphabet { //TODO use MIDI codes
     }
 
 
+    // TODO: delete getFrequencies() or getAllFrequencies()
     public ArrayList<Double> getFrequencies() {
-        return myFrequencies;
+        return new ArrayList<Double>(myFrequencies);
     }
 
     public double[] getAllFrequencies() {
@@ -64,5 +70,13 @@ public class NoteAlphabet { //TODO use MIDI codes
     public static double getMIDIFrequency(int midiCode) {   //TODO move in separate class
         double pitchA4 = 440;
         return pitchA4 * Math.pow(2, (midiCode - 69) / 12.0);
+    }
+
+    public int getMinMidiCode() {
+        return myMinMidiCode;
+    }
+
+    public int getMaxMidiCode() {
+        return myMaxMidiCode;
     }
 }
