@@ -11,10 +11,7 @@ public class NotePowerGenerator {   //TODO rename
     private int myMinMidiCode;
     private int myMaxMidiCode;
     private double myTimeStep;
-    private double myTimeZeroPoint;
     private ArrayList<double[]> myNotePowerSeries = new ArrayList<double[]>();
-
-    public static final int ALIGNMENT_LOCALIZATION_FACTOR = 20;
 
     public NotePowerGenerator(Spectrum spectrum) {
         this(spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE);   //all MIDI notes (from C-1 to G9)
@@ -23,7 +20,6 @@ public class NotePowerGenerator {   //TODO rename
     public NotePowerGenerator(Spectrum spectrum, int minMidiCode, int maxMidiCode) {
         myMinMidiCode = minMidiCode;
         myMaxMidiCode = maxMidiCode;
-        myTimeZeroPoint = spectrum.getTimeZeroPoint();
         myTimeStep = spectrum.getTimeStep();
 
         ArrayList<double[]> power = spectrum.getPowerSpectrum();
@@ -41,6 +37,11 @@ public class NotePowerGenerator {   //TODO rename
         pex.loadSpectrum(power);
         pex.extract();
         ArrayList<ArrayList<Peak>> peaks = pex.getPeaks();
+
+
+        for (int i = 0; i < (int)(spectrum.getTimeZeroPoint() / myTimeStep + 1.0e-7); ++i) {
+            myNotePowerSeries.add(new double[notes.size()]);
+        }
 
         for (int i = 0; i < peaks.size(); ++i) {
             double[] notePowerSlice = new double[notes.size()];
@@ -77,10 +78,6 @@ public class NotePowerGenerator {   //TODO rename
 
     public double getTimeStep() {
         return myTimeStep;
-    }
-
-    public double getTimeZeroPoint() {
-        return myTimeZeroPoint;
     }
 
     public ArrayList<double[]> getNotePowerSeries() {
