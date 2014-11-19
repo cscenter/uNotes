@@ -1,3 +1,4 @@
+import conversions.NotePowerGenerator;
 import conversions.Spectrum;
 import conversions.TimeSeries;
 import conversions.WaveletSpectrumTransform;
@@ -23,7 +24,7 @@ public class NoteExtractorRunner {
         File outputDir = new File("test", "output");
         outputDir.mkdir();
 
-        String inputFileName = "gvp2.wav";
+        String inputFileName = "a.wav";
         File in = new File(inputDir, inputFileName);
 
         System.out.println("uNotes");
@@ -35,15 +36,15 @@ public class NoteExtractorRunner {
             series.start();
 
             STFT stft = new STFT(windowLength, timeStepLength, new BlackmanWindow());
-            Spectrum result = stft.transform(series);
+            Spectrum spectrum = stft.transform(series);
 
-            ArrayList<double[]> power = result.getPowerSpectrum();
+            ArrayList<double[]> power = spectrum.getPowerSpectrum();
 
-            double t0 = result.getTimeZeroPoint();
-            double nu0 = result.getFrequencyZeroPoint();
+            double t0 = spectrum.getTimeZeroPoint();
+            double nu0 = spectrum.getFrequencyZeroPoint();
 
-            double dt = result.getTimeStep();
-            double dnu = result.getFrequencyStep();
+            double dt = spectrum.getTimeStep();
+            double dnu = spectrum.getFrequencyStep();
             PrintStream out = new PrintStream(new File(outputDir, inputFileName + ".power.dat"));
 
             for (int i = 0; i < power.size(); ++i) {
@@ -53,65 +54,23 @@ public class NoteExtractorRunner {
             }
 
             PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".npw.dat"));
-            ///////TODO: what is pke?
-            PeakCrossExtractor pke = new PeakCrossExtractor(dt, dnu, 10);
+            // TODO: what is pke?
+//            PeakCrossExtractor pke = new PeakCrossExtractor(dt, dnu, 10);
+//            pke.loadSpectrum(power);
+//            pke.extract(63);
+//            ArrayList<ArrayList<Peak>> timePeaks = pke.getPeaks();
 
-            pke.loadSpectrum(power);
 
-            pke.extract(63);
-
-            ArrayList<ArrayList<Peak>> timePeaks = pke.getPeaks();
-            //////
-            NoteAlphabet sevenOctaves = new NoteAlphabet(2 * 12, 9 * 12 - 1);   //From C0 to B6
-            ArrayList<Double> notes = sevenOctaves.getFrequencies();
-            ////// In the first place we must to alignment the fourier spectrum
-            result.alignment(20);
-            ////// Then we can make secondary wavelet spectrum in notes frequency, corresponding to sevenOctaves
-            WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result, sevenOctaves.getAllFrequencies());
-            ArrayList<double[]> wPower = noteGetter.spectrumTransformWithCounts(result);
-            //////
-            PeakExtractor pex = new PeakExtractor(dt, dnu);
-            pex.loadSpectrum(power);
-            pex.extract();
-            ArrayList<ArrayList<Peak>> peaks = pex.getPeaks();
-
-            ArrayList<double[]> notePower = new ArrayList<double[]>();
-
-            for (int i = 0; i < peaks.size(); ++i) {
-                double[] notePowerSlice = new double[notes.size()];
-                for (int j = 0; j < peaks.get(i).size(); j++) {
-                    Peak cur = peaks.get(i).get(j);
-                    //if (cur.powerRel > 10 & cur.power > 10 & wPower.get(i)[Math.min((int)(cur.center / dnuW), wPower.size() - 1)] > 10){
-                    if (cur.powerRel > 10 & cur.power > 10) {
-                        int noteMidiCode = NoteAlphabet.getMIDICode(cur.center);
-                        //  If peak frequency if too high or too low:
-                        if (noteMidiCode < sevenOctaves.getMinMidiCode() || noteMidiCode > sevenOctaves.getMaxMidiCode()) {
-                            continue;
-                        }
-                        int noteIndex = noteMidiCode - sevenOctaves.getMinMidiCode();
-
-                        if (wPower.get(i)[noteIndex] < 10) {
-                            continue;
-                        }
-
-                        if (notePowerSlice[noteIndex] == 0 || notePowerSlice[noteIndex] < cur.power) {
-                            notePowerSlice[noteIndex] = cur.power;
-                        }
-                    }
-                }
-                notePower.add(notePowerSlice);
-            }
-
-            for (int i = 0; i < notePower.size(); ++i) {
+            // At first we must align the fourier spectrum
+            spectrum.alignment(20);
+            //  Search notes from C0 to B6
+            ArrayList<double[]> notePower2 = NotePowerGenerator.getNotePower(spectrum, 2 * 12, 9 * 12 - 1);
+            for (int i = 0; i < notePower2.size(); ++i) {
                 outNotes.print(i * dt + " ");
-                for (int j = 0; j < notePower.get(i).length; j++) {
-                    outNotes.print(notePower.get(i)[j] + " ");
+                for (int j = 0; j < notePower2.get(i).length; j++) {
+                    outNotes.print(notePower2.get(i)[j] + " ");
                 }
                 outNotes.println();
-            }
-
-            for (int i = 0; i < notes.size(); ++i) {
-                System.out.println((i + 1) + " " + notes.get(i));
             }
 
         } catch (Exception ex) {
