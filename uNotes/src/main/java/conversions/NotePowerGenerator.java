@@ -1,5 +1,6 @@
 package conversions;
 
+import conversions.notes.MidiHelper;
 import conversions.notes.NoteAlphabet;
 import conversions.peaks.Peak;
 import conversions.peaks.PeakExtractor;
@@ -16,7 +17,7 @@ public class NotePowerGenerator {   //TODO rename
     public static final int ALIGNMENT_LOCALIZATION_FACTOR = 20;
 
     public NotePowerGenerator(Spectrum spectrum) {
-        this(spectrum, 0, 127);   //all MIDI notes (from C-1 to G9)
+        this(spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE);   //all MIDI notes (from C-1 to G9)
     }
 
     public NotePowerGenerator(Spectrum spectrum, int minMidiCode, int maxMidiCode) {
@@ -43,7 +44,7 @@ public class NotePowerGenerator {   //TODO rename
             for (int j = 0; j < peaks.get(i).size(); j++) {
                 Peak cur = peaks.get(i).get(j);
                 if (cur.powerRel > 10 & cur.power > 10) {
-                    int noteMidiCode = NoteAlphabet.getMIDICode(cur.center);
+                    int noteMidiCode = MidiHelper.getMidiCode(cur.center);
                     //  If peak frequency if too high or too low:
                     if (noteMidiCode < noteAlphabet.getMinMidiCode() || noteMidiCode > noteAlphabet.getMaxMidiCode()) {
                         continue;

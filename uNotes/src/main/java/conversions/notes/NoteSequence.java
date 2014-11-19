@@ -67,7 +67,7 @@ public class NoteSequence {
             MidiEvent event = myTrack.get(i);
             int currIndex = (new Double(event.getTick() * step)).intValue();
             for (int j = prevIndex; j < currIndex; j++) {
-                double[] notesArray = new double[128];
+                double[] notesArray = new double[MidiHelper.MIDI_CODES_COUNT];
                 for (Integer note : currentNotes) {
                     notesArray[note] = 1;    //Mark note as playing
                 }
