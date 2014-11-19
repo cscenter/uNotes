@@ -5,7 +5,7 @@ public final class MidiHelper {
     /**
      * A4 note frequency, Hz
      */
-    public static final double PITCH_A4 = 440;
+    private static final double PITCH_A4 = 440;
     public static final int MIN_MIDI_CODE = 0;
     public static final int MAX_MIDI_CODE = 127;
     public static final int MIDI_CODES_COUNT = MAX_MIDI_CODE - MIN_MIDI_CODE + 1;

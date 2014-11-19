@@ -3,7 +3,9 @@ import conversions.Spectrum;
 import conversions.TimeSeries;
 import conversions.fourier.BlackmanWindow;
 import conversions.fourier.STFT;
+import conversions.notes.NoteSequence;
 
+import javax.sound.midi.MidiSystem;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.File;
@@ -66,6 +68,11 @@ public class NoteExtractorRunner {
                 }
                 outNotes.println();
             }
+
+            //MIDI output
+            File outMidi = new File(outputDir, inputFileName + ".npw.mid");
+            NoteSequence noteSequence = new NoteSequence(quasiNotes);
+            MidiSystem.write(noteSequence.getMidiSequence(), 0, outMidi);
 
         } catch (Exception ex) {
             ex.printStackTrace();

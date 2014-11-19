@@ -1,6 +1,7 @@
 package conversions.notes;
 
 import com.sun.istack.internal.NotNull;
+import conversions.QuasiNotes;
 
 import javax.sound.midi.*;
 import java.io.File;
@@ -11,6 +12,7 @@ import java.util.HashSet;
 public class NoteSequence {
     private Sequence mySequence;
     private Track myTrack;
+    private final int TEMPO = 0x51; //  MIDI command for tempo change
 
     long myLength;  //Length, ticks
     double myDuration;  // Duration, seconds
@@ -33,6 +35,12 @@ public class NoteSequence {
                 MidiEvent event = track.get(i);
                 myTrack.add(event);
                 MidiMessage midiMessage = event.getMessage();
+                if (midiMessage instanceof MetaMessage) {
+                    MetaMessage message = (MetaMessage) midiMessage;
+                    if (message.getType() == TEMPO) {
+                        myTrack.add(new MidiEvent(new MetaMessage(TEMPO, message.getData(), message.getLength()), event.getTick()));
+                    }
+                }
                 if (midiMessage instanceof ShortMessage) {
                     ShortMessage message = (ShortMessage) midiMessage;
                     int command = message.getCommand();
@@ -48,6 +56,40 @@ public class NoteSequence {
             }
             // delete this track from the sequence
             mySequence.deleteTrack(track);
+        }
+    }
+
+    // TODO add note power threshold (=0 by default)
+    public NoteSequence(@NotNull QuasiNotes quasiNotes) throws InvalidMidiDataException {
+        int minMidiCode = quasiNotes.getMinMidiCode();
+        int maxMidiCode = quasiNotes.getMaxMidiCode();
+        double timeStep = quasiNotes.getTimeStep();
+        ArrayList<double[]> noteSeries = quasiNotes.getNotePowerSeries();
+
+        mySequence = new Sequence(Sequence.PPQ, 1); // Let's say that one tick = one quarter note...
+        myTrack = mySequence.createTrack();
+        //Set tempo
+        int tempoInMPQ = (int) Math.round(timeStep * 1e6);  //  tempo in microseconds per quarter
+        byte[] data = new byte[3];
+        data[0] = (byte) ((tempoInMPQ >> 16) & 0xFF);
+        data[1] = (byte) ((tempoInMPQ >> 8) & 0xFF);
+        data[2] = (byte) (tempoInMPQ & 0xFF);
+        MetaMessage tempoMessage = new MetaMessage(TEMPO, data, data.length);
+        myTrack.add(new MidiEvent(tempoMessage, 0));
+
+        HashSet<Integer> currentNotes = new HashSet<Integer>();
+        for (int tick = 0; tick < noteSeries.size(); tick++) {
+            double[] power = noteSeries.get(tick);
+            for (int noteIndex = 0; noteIndex < power.length; noteIndex++) {
+                int midiCode = noteIndex + minMidiCode;
+                if (power[noteIndex] > 0 && !currentNotes.contains(midiCode)) {
+                    myTrack.add(new MidiEvent(new ShortMessage(ShortMessage.NOTE_ON, midiCode, 127), tick));
+                    currentNotes.add(midiCode);
+                } else if (power[noteIndex] <= 0 && currentNotes.contains(midiCode)) {
+                    myTrack.add(new MidiEvent(new ShortMessage(ShortMessage.NOTE_OFF, midiCode, 0), tick));
+                    currentNotes.remove(midiCode);
+                }
+            }
         }
     }
 
