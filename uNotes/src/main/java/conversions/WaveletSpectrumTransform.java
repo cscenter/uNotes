@@ -99,6 +99,7 @@ public class WaveletSpectrumTransform implements Transformation {
     }
 
     public ArrayList<double[]> spectrumTransformWithCounts(Spectrum input) {
+        ArrayList<double[]> alignmentInputSpectrum = input.getAignmentPowerSpectrum();
 
         ArrayList<double[]> currentSpectrum = new ArrayList<double[]>();
 
@@ -108,7 +109,7 @@ public class WaveletSpectrumTransform implements Transformation {
             double[] wav = new double[myWindowLength];
             double[] scalogramsSection = new double[scaleLength];
 
-            System.arraycopy(input.getPowerSpectrum().get(sectionNum), 0, wav, 0, myWindowLength);
+            System.arraycopy(alignmentInputSpectrum.get(sectionNum), 0, wav, 0, myWindowLength);
 
             Complex waveletAmplitude;
             Complex[] section;

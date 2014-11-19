@@ -8,11 +8,11 @@ import conversions.peaks.PeakExtractor;
 import java.util.ArrayList;
 
 public class NotePowerGenerator {   //TODO rename
-    private int minMidiCode;
-    private int maxMidiCode;
-    private double timeStep;
-    private double timeZeroPoint;
-    private ArrayList<double[]> notePowerSeries = new ArrayList<double[]>();
+    private int myMinMidiCode;
+    private int myMaxMidiCode;
+    private double myTimeStep;
+    private double myTimeZeroPoint;
+    private ArrayList<double[]> myNotePowerSeries = new ArrayList<double[]>();
 
     public static final int ALIGNMENT_LOCALIZATION_FACTOR = 20;
 
@@ -21,6 +21,11 @@ public class NotePowerGenerator {   //TODO rename
     }
 
     public NotePowerGenerator(Spectrum spectrum, int minMidiCode, int maxMidiCode) {
+        myMinMidiCode = minMidiCode;
+        myMaxMidiCode = maxMidiCode;
+        myTimeZeroPoint = spectrum.getTimeZeroPoint();
+        myTimeStep = spectrum.getTimeStep();
+
         ArrayList<double[]> power = spectrum.getPowerSpectrum();
 
         double dt = spectrum.getTimeStep();
@@ -29,8 +34,6 @@ public class NotePowerGenerator {   //TODO rename
         NoteAlphabet noteAlphabet = new NoteAlphabet(minMidiCode, maxMidiCode);
         ArrayList<Double> notes = noteAlphabet.getFrequencies();
 
-        //  TODO We assume that spectrum is aligned
-        // Then we can make secondary wavelet spectrum in notes frequencies, corresponding to noteAlphabet
         WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(spectrum, noteAlphabet.getAllFrequencies());
         ArrayList<double[]> wPower = noteGetter.spectrumTransformWithCounts(spectrum);
 
@@ -60,27 +63,27 @@ public class NotePowerGenerator {   //TODO rename
                     }
                 }
             }
-            notePowerSeries.add(notePowerSlice);
+            myNotePowerSeries.add(notePowerSlice);
         }
     }
 
     public int getMaxMidiCode() {
-        return maxMidiCode;
+        return myMaxMidiCode;
     }
 
     public int getMinMidiCode() {
-        return minMidiCode;
+        return myMinMidiCode;
     }
 
     public double getTimeStep() {
-        return timeStep;
+        return myTimeStep;
     }
 
     public double getTimeZeroPoint() {
-        return timeZeroPoint;
+        return myTimeZeroPoint;
     }
 
     public ArrayList<double[]> getNotePowerSeries() {
-        return notePowerSeries;
+        return myNotePowerSeries;
     }
 }

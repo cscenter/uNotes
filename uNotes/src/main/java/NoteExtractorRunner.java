@@ -56,8 +56,6 @@ public class NoteExtractorRunner {
 //            ArrayList<ArrayList<Peak>> timePeaks = pke.getPeaks();
 
 
-            // At first we must align the fourier spectrum
-            spectrum.alignment(20);
             //  Search notes from C0 to B6
             NotePowerGenerator notePowerGenerator = new NotePowerGenerator(spectrum, 2 * 12, 9 * 12 - 1);
             ArrayList<double[]> notePower = notePowerGenerator.getNotePowerSeries();

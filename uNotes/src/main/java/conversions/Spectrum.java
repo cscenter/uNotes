@@ -13,6 +13,8 @@ public class Spectrum {
     private double myTimeStep;
     private double myFrequencyStep;
 
+    private static final int ALIGNMENT_LOCALIZATION_FACTOR = 20;
+
     public Spectrum(@NotNull ArrayList<double[]> power, double timeZeroPoint, double frequencyZeroPoint, double timeStep, double frequencyStep) {
         myPowerSpectrum = power;
 
@@ -47,13 +49,15 @@ public class Spectrum {
         return myFrequencyStep;
     }
 
-    public void alignment(int localization) {
+    public ArrayList<double[]> getAignmentPowerSpectrum() {
+        ArrayList<double[]> alignmentPowerSpectrum = new ArrayList<double[]>();
+
         int spectrumSize = myPowerSpectrum.get(0).length;
-        int range = spectrumSize / localization;
+        int range = spectrumSize / ALIGNMENT_LOCALIZATION_FACTOR;
 
-        System.out.println(range);
+        for (int i = 0; i < myPowerSpectrum.size(); ++i) {
+            double[] section = myPowerSpectrum.get(i);
 
-        for (double[] section : myPowerSpectrum) {
             double[] rangeMean = new double[spectrumSize];
 
             for (int k = 0; k < range; ++k) {
@@ -84,9 +88,17 @@ public class Spectrum {
                 rangeMean[k] = rangeMean[k] / (range + (spectrumSize - 1 - k));
             }
             //////////
+
+            double[] alignmentSection = new double[spectrumSize];
+
             for (int k = 0; k < spectrumSize; ++k) {
-                section[k] -= rangeMean[k];
+                alignmentSection[k] = section[k] - rangeMean[k];
             }
+
+            alignmentPowerSpectrum.add(i, alignmentSection);
         }
+
+        return alignmentPowerSpectrum;
     }
+
 }

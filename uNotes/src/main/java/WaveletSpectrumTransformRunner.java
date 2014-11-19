@@ -52,7 +52,7 @@ public class WaveletSpectrumTransformRunner {
             }
 
             //
-            result.alignment(20);
+            //result.alignment(20);
             //
 
             WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result);
@@ -76,8 +76,8 @@ public class WaveletSpectrumTransformRunner {
 
             ///////////////////////////////////////////////////////
 
-            double counts[] = new double[]{16.572815184059706, 22.097086912079607, 27.62135864009951,
-                    33.14563036811941, 38.66990209613931, 44.194173824159215, 49.71844555217911};
+            double counts[] = new double[]{11.048543456039804, 16.572815184059706, 22.097086912079607, 27.62135864009951,
+                    33.14563036811941, 38.66990209613931, 44.194173824159215, 49.71844555217911, 5104.427076690389};
 
             /*
             int spectrumLength = result.getPowerSpectrum().elementAt(0).length;
@@ -94,7 +94,7 @@ public class WaveletSpectrumTransformRunner {
             t0 = result.getTimeZeroPoint();
             dt = result.getTimeStep();
 
-            PrintStream outNotes2 = new PrintStream(new File(inputFileName + ".wt2point.dat"));
+            PrintStream outNotes2 = new PrintStream(new File(outputDir, inputFileName + ".wt2point.dat"));
 
             for (int i = 0; i < subSpectrum2.size(); ++i) {
                 for (int j = 0; j < subSpectrum2.get(i).length; j++) {
