@@ -1,13 +1,8 @@
 import conversions.NotePowerGenerator;
 import conversions.Spectrum;
 import conversions.TimeSeries;
-import conversions.WaveletSpectrumTransform;
 import conversions.fourier.BlackmanWindow;
 import conversions.fourier.STFT;
-import conversions.notes.NoteAlphabet;
-import conversions.peaks.Peak;
-import conversions.peaks.PeakCrossExtractor;
-import conversions.peaks.PeakExtractor;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -64,11 +59,12 @@ public class NoteExtractorRunner {
             // At first we must align the fourier spectrum
             spectrum.alignment(20);
             //  Search notes from C0 to B6
-            ArrayList<double[]> notePower2 = NotePowerGenerator.getNotePower(spectrum, 2 * 12, 9 * 12 - 1);
-            for (int i = 0; i < notePower2.size(); ++i) {
+            NotePowerGenerator notePowerGenerator = new NotePowerGenerator(spectrum, 2 * 12, 9 * 12 - 1);
+            ArrayList<double[]> notePower = notePowerGenerator.getNotePowerSeries();
+            for (int i = 0; i < notePower.size(); ++i) {
                 outNotes.print(i * dt + " ");
-                for (int j = 0; j < notePower2.get(i).length; j++) {
-                    outNotes.print(notePower2.get(i)[j] + " ");
+                for (int j = 0; j < notePower.get(i).length; j++) {
+                    outNotes.print(notePower.get(i)[j] + " ");
                 }
                 outNotes.println();
             }

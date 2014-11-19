@@ -1,39 +1,25 @@
 package conversions;
 
-import conversions.fourier.BlackmanWindow;
-import conversions.fourier.STFT;
 import conversions.notes.NoteAlphabet;
 import conversions.peaks.Peak;
 import conversions.peaks.PeakExtractor;
 
-import javax.sound.sampled.AudioInputStream;
 import java.util.ArrayList;
 
-public class NotePowerGenerator {
+public class NotePowerGenerator {   //TODO rename
+    private int minMidiCode;
+    private int maxMidiCode;
+    private double timeStep;
+    private double timeZeroPoint;
+    private ArrayList<double[]> notePowerSeries = new ArrayList<double[]>();
 
-    public static ArrayList<double[]> getNotePower(AudioInputStream inputStream, int windowLength, int timeStepLength) {
-        return getNotePower(inputStream, windowLength, timeStepLength, 0, 127);   //all MIDI notes (from C-1 to G9)
+    public static final int ALIGNMENT_LOCALIZATION_FACTOR = 20;
+
+    public NotePowerGenerator(Spectrum spectrum) {
+        this(spectrum, 0, 127);   //all MIDI notes (from C-1 to G9)
     }
 
-    public static ArrayList<double[]> getNotePower(Spectrum spectrum) {
-        return getNotePower(spectrum, 0, 127);   //all MIDI notes (from C-1 to G9)
-    }
-
-    public static ArrayList<double[]> getNotePower(AudioInputStream inputStream, int windowLength, int timeStepLength, int minMidiCode, int maxMidiCode) {
-
-        TimeSeries series = new TimeSeries(inputStream);
-        series.start();
-
-        STFT stft = new STFT(windowLength, timeStepLength, new BlackmanWindow());
-        Spectrum spectrum = stft.transform(series);
-
-        // At first we must align the fourier spectrum
-        spectrum.alignment(20); //TODO magic constant
-
-        return getNotePower(spectrum, minMidiCode, maxMidiCode);
-    }
-
-    public static ArrayList<double[]> getNotePower(Spectrum spectrum, int minMidiCode, int maxMidiCode) {
+    public NotePowerGenerator(Spectrum spectrum, int minMidiCode, int maxMidiCode) {
         ArrayList<double[]> power = spectrum.getPowerSpectrum();
 
         double dt = spectrum.getTimeStep();
@@ -51,8 +37,6 @@ public class NotePowerGenerator {
         pex.loadSpectrum(power);
         pex.extract();
         ArrayList<ArrayList<Peak>> peaks = pex.getPeaks();
-
-        ArrayList<double[]> notePower = new ArrayList<double[]>();
 
         for (int i = 0; i < peaks.size(); ++i) {
             double[] notePowerSlice = new double[notes.size()];
@@ -75,9 +59,27 @@ public class NotePowerGenerator {
                     }
                 }
             }
-            notePower.add(notePowerSlice);
+            notePowerSeries.add(notePowerSlice);
         }
+    }
 
-        return notePower;
+    public int getMaxMidiCode() {
+        return maxMidiCode;
+    }
+
+    public int getMinMidiCode() {
+        return minMidiCode;
+    }
+
+    public double getTimeStep() {
+        return timeStep;
+    }
+
+    public double getTimeZeroPoint() {
+        return timeZeroPoint;
+    }
+
+    public ArrayList<double[]> getNotePowerSeries() {
+        return notePowerSeries;
     }
 }
