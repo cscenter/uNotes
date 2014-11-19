@@ -43,14 +43,12 @@ public class NotePowerGenerator {
             for (int j = 0; j < peaks.get(i).size(); j++) {
                 Peak cur = peaks.get(i).get(j);
                 if (cur.powerRel > 10 & cur.power > 10) {
-                    double diff = Double.MAX_VALUE;
-                    int noteIndex = 0;
-                    for (int l = 0; l < notes.size(); ++l) {
-                        if (Math.abs(notes.get(l) - cur.center) < diff) {
-                            noteIndex = l;
-                            diff = Math.abs(notes.get(l) - cur.center);
-                        }
+                    int noteMidiCode = NoteAlphabet.getMIDICode(cur.center);
+                    //  If peak frequency if too high or too low:
+                    if (noteMidiCode < sevenOctaves.getMinMidiCode() || noteMidiCode > sevenOctaves.getMaxMidiCode()) {
+                        continue;
                     }
+                    int noteIndex = noteMidiCode - sevenOctaves.getMinMidiCode();
 
                     if (wPower.get(i)[noteIndex] < 10) {
                         continue;
