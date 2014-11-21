@@ -45,6 +45,7 @@ public class QuasiNotes {   //TODO rename
 
         for (int i = 0; i < peaks.size(); ++i) {
             double[] notePowerSlice = new double[notes.size()];
+            double criticalNoise = getCriticalNoise(wPower.get(i), 0.1);
             for (int j = 0; j < peaks.get(i).size(); j++) {
                 Peak cur = peaks.get(i).get(j);
                 if (cur.powerRel > 10 & cur.power > 10) {
@@ -55,7 +56,7 @@ public class QuasiNotes {   //TODO rename
                     }
                     int noteIndex = noteMidiCode - noteAlphabet.getMinMidiCode();
 
-                    if (wPower.get(i)[noteIndex] < 10) {
+                    if (wPower.get(i)[noteIndex] < criticalNoise) {
                         continue;
                     }
 
@@ -82,5 +83,18 @@ public class QuasiNotes {   //TODO rename
 
     public ArrayList<double[]> getNotePowerSeries() {
         return myNotePowerSeries;
+    }
+
+    private double getCriticalNoise(double[] selection, double statisticalSignificance) {
+        if ((statisticalSignificance > 1.0) || (statisticalSignificance < 0.0)) {
+            throw new IllegalArgumentException("statisticalSignificance must belongs to the interval [0, 1]");
+        }
+        double variance = 0;
+        for (int i = 0; i < selection.length; ++i) {
+            variance += (selection[i] * selection[i]);
+        }
+        variance = variance / (double) (selection.length - 1);
+
+        return (-variance * variance * Math.log(statisticalSignificance) / (double)selection.length);
     }
 }
