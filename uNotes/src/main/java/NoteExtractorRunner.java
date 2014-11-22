@@ -42,13 +42,13 @@ public class NoteExtractorRunner {
 
             double dt = spectrum.getTimeStep();
             double dnu = spectrum.getFrequencyStep();
-            PrintStream out = new PrintStream(new File(outputDir, inputFileName + ".power.dat"));
-
-            for (int i = 0; i < power.size(); ++i) {
-                for (int j = 0; j < power.get(i).length; j++) {
-                    out.println((i * dt + t0) + "   " + (j * dnu + nu0) + "  " + power.get(i)[j]);
-                }
-            }
+//            PrintStream out = new PrintStream(new File(outputDir, inputFileName + ".power.dat"));
+//
+//            for (int i = 0; i < power.size(); ++i) {
+//                for (int j = 0; j < power.get(i).length; j++) {
+//                    out.println((i * dt + t0) + "   " + (j * dnu + nu0) + "  " + power.get(i)[j]);
+//                }
+//            }
 
             PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".npw.dat"));
             // TODO: what is pke?
