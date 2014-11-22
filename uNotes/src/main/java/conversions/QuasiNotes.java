@@ -7,7 +7,10 @@ import conversions.peaks.PeakExtractor;
 
 import java.util.ArrayList;
 
-public class QuasiNotes {   //TODO rename
+public class QuasiNotes {
+    public static final int relativePowerThreshold = 10;
+    public static final int powerThreshold = 10;
+    public static final double statisticalSignificance = 0.1;
     private int myMinMidiCode;
     private int myMaxMidiCode;
     private double myTimeStep;
@@ -39,16 +42,16 @@ public class QuasiNotes {   //TODO rename
         ArrayList<ArrayList<Peak>> peaks = pex.getPeaks();
 
 
-        for (int i = 0; i < (int)(spectrum.getTimeZeroPoint() / myTimeStep + 1.0e-7); ++i) {
+        for (int i = 0; i < (int) (spectrum.getTimeZeroPoint() / myTimeStep + 1.0e-7); ++i) {
             myNotePowerSeries.add(new double[notes.size()]);
         }
 
         for (int i = 0; i < peaks.size(); ++i) {
             double[] notePowerSlice = new double[notes.size()];
-            double criticalNoise = getCriticalNoise(wPower.get(i), 0.1);
+            double criticalNoise = getCriticalNoise(wPower.get(i), statisticalSignificance);
             for (int j = 0; j < peaks.get(i).size(); j++) {
                 Peak cur = peaks.get(i).get(j);
-                if (cur.powerRel > 10 & cur.power > 10) {
+                if (cur.powerRel > relativePowerThreshold & cur.power > powerThreshold) {
                     int noteMidiCode = MidiHelper.getMidiCode(cur.center);
                     //  If peak frequency if too high or too low:
                     if (noteMidiCode < noteAlphabet.getMinMidiCode() || noteMidiCode > noteAlphabet.getMaxMidiCode()) {
@@ -87,7 +90,7 @@ public class QuasiNotes {   //TODO rename
 
     private double getCriticalNoise(double[] selection, double statisticalSignificance) {
         if ((statisticalSignificance > 1.0) || (statisticalSignificance < 0.0)) {
-            throw new IllegalArgumentException("statisticalSignificance must belongs to the interval [0, 1]");
+            throw new IllegalArgumentException("statisticalSignificance must belong to the interval [0, 1]");
         }
         double variance = 0;
         for (int i = 0; i < selection.length; ++i) {
@@ -95,6 +98,6 @@ public class QuasiNotes {   //TODO rename
         }
         variance = variance / (double) (selection.length - 1);
 
-        return (-variance * variance * Math.log(statisticalSignificance) / (double)selection.length);
+        return (-variance * variance * Math.log(statisticalSignificance) / (double) selection.length);
     }
 }
