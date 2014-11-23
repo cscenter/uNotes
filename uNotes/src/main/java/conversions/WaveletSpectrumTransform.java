@@ -53,10 +53,6 @@ public class WaveletSpectrumTransform implements Transformation {
 
         int countsLength = counts.length;
 
-        if ((counts[0] < 1.9 * frequencyStep / ALPHA) || (counts[countsLength - 1] > (myWindowLength - 0.9) * frequencyStep / ALPHA)) {
-            throw new IllegalArgumentException("your counts are out of wavelet range");
-        }
-
         for (int i = 1; i < countsLength; ++i) {
             if (counts[i] < counts[i - 1]) {
                 throw new IllegalArgumentException("your counts are not sorted");
@@ -98,14 +94,13 @@ public class WaveletSpectrumTransform implements Transformation {
 
     }
 
-    public ArrayList<double[]> spectrumTransformWithCounts(Spectrum input) {
-        ArrayList<double[]> alignmentInputSpectrum = input.getAlignedPowerSpectrum();
+    public ArrayList<double[]> spectrumTransformWithCounts(ArrayList<double[]> alignmentInputSpectrum) {
 
         ArrayList<double[]> currentSpectrum = new ArrayList<double[]>();
 
         int scaleLength = myWaveletsArguments.size();
 
-        for (int sectionNum = 0; sectionNum < input.getPowerSpectrum().size(); ++sectionNum) {
+        for (int sectionNum = 0; sectionNum < alignmentInputSpectrum.size(); ++sectionNum) {
             double[] wav = new double[myWindowLength];
             double[] scalogramsSection = new double[scaleLength];
 

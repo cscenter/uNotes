@@ -1,3 +1,4 @@
+import conversions.QuasiNotes;
 import conversions.Spectrum;
 import conversions.TimeSeries;
 import conversions.WaveletSpectrumTransform;
@@ -32,73 +33,27 @@ public class WaveletSpectrumTransformRunner {
             STFT stft = new STFT(windowLength, timeStepLength, new BlackmanWindow());
             Spectrum result = stft.transform(series);
 
-            ArrayList<double[]> power = result.getPowerSpectrum();
+            double[] counts = new double[result.getPowerSpectrum().get(0).length];
+            double nu0 = result.getFrequencyZeroPoint();
+            double dnu = result.getFrequencyStep();
+            for (int j = 0; j < counts.length; ++j) {
+                counts[j] = nu0 + j * dnu;
+            }
+
+            WaveletSpectrumTransform noteGetterWithCounts = new WaveletSpectrumTransform(result, counts);
+            ArrayList<double[]> alignedPower = result.getAlignedPowerSpectrum();
+
+            ArrayList<double[]> subSpectrum2 = noteGetterWithCounts.spectrumTransformWithCounts(alignedPower);
 
             double t0 = result.getTimeZeroPoint();
-            double nu0 = result.getFrequencyZeroPoint();
-
             double dt = result.getTimeStep();
-            double dnu = result.getFrequencyStep();
-            PrintStream out = new PrintStream(new File(outputDir, inputFileName + ".power.dat"));
-
-            //
-            //result.alignment(20);
-            //
-
-            for (int i = 0; i < power.size(); ++i) {
-                for (int j = 0; j < power.get(i).length; j++) {
-                    out.println((i * dt + t0) + "   " + (j * dnu + nu0) + "  " + power.get(i)[j]);
-                }
-            }
-
-            //
-            //result.alignment(20);
-            //
-
-            WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(result);
-
-            Spectrum subSpectrum = noteGetter.spectrumTransform(result);
-
-            power = subSpectrum.getPowerSpectrum();
-
-            t0 = subSpectrum.getTimeZeroPoint();
-            nu0 = subSpectrum.getFrequencyZeroPoint();
-
-            dt = subSpectrum.getTimeStep();
-            dnu = subSpectrum.getFrequencyStep();
-            PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".wt2.dat"));
-
-            for (int i = 0; i < power.size(); ++i) {
-                for (int j = 0; j < power.get(i).length; j++) {
-                    outNotes.println((i * dt + t0) + "   " + (j * dnu + nu0) + "   " + power.get(i)[j]);
-                }
-            }
-
-            ///////////////////////////////////////////////////////
-
-            double counts[] = new double[]{11.048543456039804, 16.572815184059706, 22.097086912079607, 27.62135864009951,
-                    33.14563036811941, 38.66990209613931, 44.194173824159215, 49.71844555217911, 5104.427076690389};
-
-            /*
-            int spectrumLength = result.getPowerSpectrum().elementAt(0).length;
-
-            double counts[] = new double[spectrumLength - 2];
-            for (int i = 0; i < spectrumLength - 2; ++i) {
-                counts[i] = (i + 2) * result.getFrequencyStep() / WaveletSpectrumTransform.ALPHA;
-            }
-            */
-            WaveletSpectrumTransform noteGetterWithCounts = new WaveletSpectrumTransform(result, counts);
-
-            ArrayList<double[]> subSpectrum2 = noteGetterWithCounts.spectrumTransformWithCounts(result);
-
-            t0 = result.getTimeZeroPoint();
-            dt = result.getTimeStep();
 
             PrintStream outNotes2 = new PrintStream(new File(outputDir, inputFileName + ".wt2point.dat"));
 
             for (int i = 0; i < subSpectrum2.size(); ++i) {
+                double criticalNoise = QuasiNotes.getCriticalNoise(alignedPower.get(i), 0.03);
                 for (int j = 0; j < subSpectrum2.get(i).length; j++) {
-                    outNotes2.println((i * dt + t0) + "   " + counts[j] + "   " + subSpectrum2.get(i)[j]);
+                    outNotes2.println((i * dt + t0) + "   " + counts[j] + "   " + subSpectrum2.get(i)[j] + "   " + criticalNoise);
                 }
             }
 
