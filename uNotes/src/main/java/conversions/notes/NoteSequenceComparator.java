@@ -1,11 +1,10 @@
 package conversions.notes;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class NoteSequenceComparator {
     /**
-     * This method calculates distance between two note sequences.
+     * This method calculates distance between two note sequences (proportion of different notes).
      *
      * At every time step we look at every note
      * @param x first note sequence
@@ -13,7 +12,7 @@ public class NoteSequenceComparator {
      * @param timeSeriesLength number of points
      * @param minMidiCode lowest note
      * @param maxMidiCode highest note
-     * @return
+     * @return normalized distance between 2 sequences.
      */
     public static double distance(NoteSequence x, NoteSequence y, int timeSeriesLength, int minMidiCode, int maxMidiCode) {
         double differences = 0;

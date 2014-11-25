@@ -21,7 +21,7 @@ public class QuasiNotes {
         this(spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE);   //all MIDI notes (from C-1 to G9)
     }
 
-    public QuasiNotes(Spectrum spectrum, int minMidiCode, int maxMidiCode) throws FileNotFoundException {
+    public QuasiNotes(Spectrum spectrum, int minMidiCode, int maxMidiCode) {
         myMinMidiCode = minMidiCode;
         myMaxMidiCode = maxMidiCode;
         myTimeStep = spectrum.getTimeStep();
@@ -120,8 +120,8 @@ public class QuasiNotes {
         }
 
         double variance = 0;
-        for (int i = 0; i < selection.length; ++i) {
-            variance += (selection[i] * selection[i]);
+        for (double value : selection) {
+            variance += (value * value);
         }
         variance = variance / (double) (selection.length - 1);
 

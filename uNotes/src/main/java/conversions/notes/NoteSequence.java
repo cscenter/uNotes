@@ -62,7 +62,6 @@ public class NoteSequence {
     // TODO add note power threshold (=0 by default)
     public NoteSequence(@NotNull QuasiNotes quasiNotes) throws InvalidMidiDataException {
         int minMidiCode = quasiNotes.getMinMidiCode();
-        int maxMidiCode = quasiNotes.getMaxMidiCode();
         double timeStep = quasiNotes.getTimeStep();
         ArrayList<double[]> noteSeries = quasiNotes.getNotePowerSeries();
 
