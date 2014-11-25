@@ -3,6 +3,7 @@ import conversions.Spectrum;
 import conversions.TimeSeries;
 import conversions.fourier.BlackmanWindow;
 import conversions.fourier.STFT;
+import conversions.notes.Note;
 import conversions.notes.NoteSequence;
 
 import javax.sound.midi.MidiSystem;
@@ -51,15 +52,9 @@ public class NoteExtractorRunner {
 //            }
 
             PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".npw.dat"));
-            // TODO: what is pke?
-//            PeakCrossExtractor pke = new PeakCrossExtractor(dt, dnu, 10);
-//            pke.loadSpectrum(power);
-//            pke.extract(63);
-//            ArrayList<ArrayList<Peak>> timePeaks = pke.getPeaks();
-
 
             //  Search notes from C0 to B6
-            QuasiNotes quasiNotes = new QuasiNotes(spectrum, 2 * 12, 9 * 12 - 1);
+            QuasiNotes quasiNotes = new QuasiNotes(spectrum, Note.C.midiCode(1), Note.B.midiCode(6));
             ArrayList<double[]> notePower = quasiNotes.getNotePowerSeries();
             for (int i = 0; i < notePower.size(); ++i) {
                 outNotes.print(i * dt + " ");
