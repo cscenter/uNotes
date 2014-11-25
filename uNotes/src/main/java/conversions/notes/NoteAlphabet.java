@@ -1,17 +1,11 @@
 package conversions.notes;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
-public final class NoteAlphabet { //TODO use MIDI codes
-    private ArrayList<Double> myFrequencies;    //TODO double[] ?
+public final class NoteAlphabet {
+    private double[] myFrequencies;
     private int myMinMidiCode;
     private int myMaxMidiCode;
-
-    @Deprecated
-    public NoteAlphabet(int lastOctave) {
-        //notes from C0 to B(lastOctave)
-        this(2 * 12, (lastOctave + 2) * 12 - 1);
-    }
 
     /**
      * builds frequencies from minMidiCode to maxMidiCode
@@ -27,24 +21,16 @@ public final class NoteAlphabet { //TODO use MIDI codes
         myMinMidiCode = minMidiCode;
         myMaxMidiCode = maxMidiCode;
 
-        myFrequencies = new ArrayList<Double>(maxMidiCode - minMidiCode + 1);
-        for (int i = minMidiCode; i <= maxMidiCode; i++) {
-            myFrequencies.add(MidiHelper.getMidiFrequency(i));
+        int midiCodesCount = maxMidiCode - minMidiCode + 1;
+        myFrequencies = new double[midiCodesCount];
+        for (int i = 0; i < midiCodesCount; i++) {
+            myFrequencies[i] = MidiHelper.getMidiFrequency(i + minMidiCode);
         }
     }
 
 
-    // TODO: delete getFrequencies() or getAllFrequencies()
-    public ArrayList<Double> getFrequencies() {
-        return new ArrayList<Double>(myFrequencies);
-    }
-
-    public double[] getAllFrequencies() {
-        double[] allFrequencies = new double[myFrequencies.size()];
-        for (int i = 0; i < myFrequencies.size(); ++i) {
-            allFrequencies[i] = myFrequencies.get(i);
-        }
-        return allFrequencies;
+    public double[] getFrequencies() {
+        return Arrays.copyOf(myFrequencies, myFrequencies.length);
     }
 
     public int getMinMidiCode() {

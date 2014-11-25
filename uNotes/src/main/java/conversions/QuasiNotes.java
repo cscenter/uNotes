@@ -33,9 +33,9 @@ public class QuasiNotes {
         double dnu = spectrum.getFrequencyStep();
 
         NoteAlphabet noteAlphabet = new NoteAlphabet(minMidiCode, maxMidiCode);
-        ArrayList<Double> notes = noteAlphabet.getFrequencies();
+        double[] notes = noteAlphabet.getFrequencies();
 
-        WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(spectrum, noteAlphabet.getAllFrequencies());
+        WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(spectrum, noteAlphabet.getFrequencies());
         ArrayList<double[]> wPower = noteGetter.spectrumTransformWithCounts(alignedPower);
 
         PeakExtractor pex = new PeakExtractor(dt, dnu);
@@ -45,7 +45,7 @@ public class QuasiNotes {
 
 
         for (int i = 0; i < (int) (spectrum.getTimeZeroPoint() / myTimeStep + 1.0e-7); ++i) {
-            myNotePowerSeries.add(new double[notes.size()]);
+            myNotePowerSeries.add(new double[notes.length]);
         }
 
         //
@@ -58,7 +58,7 @@ public class QuasiNotes {
         criticalNoise /= peaks.size();
 
         for (int i = 0; i < peaks.size(); ++i) {
-            double[] notePowerSlice = new double[notes.size()];
+            double[] notePowerSlice = new double[notes.length];
             //double criticalNoise = getCriticalNoise(alignedPower.get(i), statisticalSignificance);
 
             /*
