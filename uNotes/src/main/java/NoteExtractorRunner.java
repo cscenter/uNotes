@@ -53,7 +53,7 @@ public class NoteExtractorRunner {
 
             PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".npw.dat"));
 
-            //  Search notes from C0 to B6
+            //  Search notes from C1 to B6
             QuasiNotes quasiNotes = new QuasiNotes(spectrum, Note.C.midiCode(1), Note.B.midiCode(6));
             ArrayList<double[]> notePower = quasiNotes.getNotePowerSeries();
             for (int i = 0; i < notePower.size(); ++i) {
