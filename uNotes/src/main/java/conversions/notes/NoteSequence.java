@@ -12,7 +12,10 @@ import java.util.HashSet;
 public class NoteSequence {
     private Sequence mySequence;
     private Track myTrack;
-    private final int TEMPO = 0x51; //  MIDI command for tempo change
+    /**
+     * MIDI command for tempo change
+     */
+    private final int TEMPO = 0x51;
 
     long myLength;  //Length, ticks
     double myDuration;  // Duration, seconds
@@ -38,7 +41,7 @@ public class NoteSequence {
                 if (midiMessage instanceof MetaMessage) {
                     MetaMessage message = (MetaMessage) midiMessage;
                     if (message.getType() == TEMPO) {
-                        myTrack.add(new MidiEvent(new MetaMessage(TEMPO, message.getData(), message.getLength()), event.getTick()));
+                        myTrack.add(new MidiEvent(new MetaMessage(TEMPO, message.getData(), message.getData().length), event.getTick()));
                     }
                 }
                 if (midiMessage instanceof ShortMessage) {
@@ -59,16 +62,38 @@ public class NoteSequence {
         }
     }
 
-    // TODO add note power threshold (=0 by default)
+    /**
+     * Build note sequence, assuming that one timeStep  = one MIDI tick = one quarter note.
+     * Use another constructor if you want to specify tempo(BPM) and time resolution (e.g. up to 16th notes)
+     *
+     * @param quasiNotes QuasiNotes sequence
+     * @throws InvalidMidiDataException
+     */
     public NoteSequence(@NotNull QuasiNotes quasiNotes) throws InvalidMidiDataException {
+        this(quasiNotes, (int) (60.0 / quasiNotes.getTimeStep()), 1);   // Let's say that one tick = one quarter note...
+    }
+
+    /**
+     * @param quasiNotes          QuasiNotes sequence
+     * @param tempoInBPM          tempo of melody in beats per minute.
+     *                            Duration of quarter note is (60 / tempoInBPM ) seconds
+     * @param ticksPerQuarterNote number of ticks per quarter note.
+     *                            This parameter specifies duration of shortest note we want to use,
+     *                            e.g ticksPerQuarterNote = 4 for 16th notes, ticksPerQuarterNote = 8 for 32nd notes.
+     * @throws InvalidMidiDataException
+     */
+    // TODO add note power threshold (=0 by default)
+    public NoteSequence(@NotNull QuasiNotes quasiNotes, int tempoInBPM, int ticksPerQuarterNote) throws InvalidMidiDataException {
         int minMidiCode = quasiNotes.getMinMidiCode();
         double timeStep = quasiNotes.getTimeStep();
         ArrayList<double[]> noteSeries = quasiNotes.getNotePowerSeries();
 
-        mySequence = new Sequence(Sequence.PPQ, 1); // Let's say that one tick = one quarter note...
+        double outputTimeStep = 60.0 / tempoInBPM / ticksPerQuarterNote;
+
+        mySequence = new Sequence(Sequence.PPQ, ticksPerQuarterNote);
         myTrack = mySequence.createTrack();
         //Set tempo
-        int tempoInMPQ = (int) Math.round(timeStep * 1e6);  //  tempo in microseconds per quarter
+        int tempoInMPQ = (int) Math.round(60.0 / tempoInBPM * 1e6);  //  tempo in microseconds per quarter
         byte[] data = new byte[3];
         data[0] = (byte) ((tempoInMPQ >> 16) & 0xFF);
         data[1] = (byte) ((tempoInMPQ >> 8) & 0xFF);
@@ -77,8 +102,9 @@ public class NoteSequence {
         myTrack.add(new MidiEvent(tempoMessage, 0));
 
         HashSet<Integer> currentNotes = new HashSet<Integer>();
-        for (int tick = 0; tick < noteSeries.size(); tick++) {
-            double[] power = noteSeries.get(tick);
+        for (int timePoint = 0; timePoint < noteSeries.size(); timePoint++) {
+            double[] power = noteSeries.get(timePoint);
+            int tick = (int) Math.round(timePoint * timeStep / outputTimeStep);
             for (int noteIndex = 0; noteIndex < power.length; noteIndex++) {
                 int midiCode = noteIndex + minMidiCode;
                 if (power[noteIndex] > 0 && !currentNotes.contains(midiCode)) {
