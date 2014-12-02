@@ -9,19 +9,33 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class QuasiNotes {
-    public static final int relativePowerThreshold = 20;
-    public static final int powerThreshold = 0;
-    public static final double statisticalSignificance = 0.003;
+    public double myRelativePowerThreshold;
+    public double myPowerThreshold;
+    public double myStatisticalSignificance;
     private int myMinMidiCode;
     private int myMaxMidiCode;
     private double myTimeStep;
     private ArrayList<double[]> myNotePowerSeries = new ArrayList<double[]>();
 
+    @Deprecated
     public QuasiNotes(Spectrum spectrum) throws FileNotFoundException {
         this(spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE);   //all MIDI notes (from C-1 to G9)
     }
 
+    public QuasiNotes(Spectrum spectrum, double relativePowerThreshold, double powerThreshold, double statisticalSignificance) {
+        this(spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE, relativePowerThreshold, powerThreshold, statisticalSignificance);
+    }
+
+    @Deprecated
     public QuasiNotes(Spectrum spectrum, int minMidiCode, int maxMidiCode) {
+        this(spectrum, minMidiCode, maxMidiCode, 20.0, 0.0, 0.003);
+    }
+
+    public QuasiNotes(Spectrum spectrum, int minMidiCode, int maxMidiCode, double relativePowerThreshold, double powerThreshold, double statisticalSignificance) {
+        myRelativePowerThreshold = relativePowerThreshold;
+        myPowerThreshold = powerThreshold;
+        myStatisticalSignificance = statisticalSignificance;
+
         myMinMidiCode = minMidiCode;
         myMaxMidiCode = maxMidiCode;
         myTimeStep = spectrum.getTimeStep();
@@ -49,17 +63,17 @@ public class QuasiNotes {
         }
 
         //
-        //PrintStream outNotes = new PrintStream(new File(new File("test", "output"), statisticalSignificance + "logger.dat"));
+        //PrintStream outNotes = new PrintStream(new File(new File("test", "output"), myStatisticalSignificance + "logger.dat"));
         //
         double criticalNoise = 0;
         for (int i = 0; i < peaks.size(); ++i) {
-            criticalNoise += getCriticalNoise(alignedPower.get(i), statisticalSignificance);
+            criticalNoise += getCriticalNoise(alignedPower.get(i), myStatisticalSignificance);
         }
         criticalNoise /= peaks.size();
 
         for (int i = 0; i < peaks.size(); ++i) {
             double[] notePowerSlice = new double[notes.length];
-            //double criticalNoise = getCriticalNoise(alignedPower.get(i), statisticalSignificance);
+            //double criticalNoise = getCriticalNoise(alignedPower.get(i), myStatisticalSignificance);
 
             /*
             double mean = 0;
@@ -77,7 +91,7 @@ public class QuasiNotes {
 
             for (int j = 0; j < peaks.get(i).size(); j++) {
                 Peak cur = peaks.get(i).get(j);
-                if (cur.powerRel > relativePowerThreshold & cur.power > powerThreshold) {
+                if (cur.powerRel > myRelativePowerThreshold & cur.power > myPowerThreshold) {
                     int noteMidiCode = MidiHelper.getMidiCode(cur.center);
                     //  If peak frequency if too high or too low:
                     if (noteMidiCode < noteAlphabet.getMinMidiCode() || noteMidiCode > noteAlphabet.getMaxMidiCode()) {
