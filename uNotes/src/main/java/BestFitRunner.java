@@ -12,22 +12,21 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.io.PrintStream;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.StringJoiner;
 
 public class BestFitRunner {
 
     public static void main(String[] args) {
         double timeStart = System.nanoTime();
-        System.out.println(new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime()));
         try {
             File inputDir = new File("test", "music");
             File outputDir = new File("test", "output");
             outputDir.mkdir();
 
             System.out.println("uNotes");
+            System.out.println(java.time.LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME));
             //for (String inputFileName : Arrays.asList("tarantella_mono_guitar", "tarantella_2guitar")) {
             for (String inputFileName : Arrays.asList("a")) {
                 String inputFileNameWav = inputFileName + ".wav";
