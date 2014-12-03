@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class NoteSequence {
+    private int myTempoInBPM;
     private Sequence mySequence;
     private Track myTrack;
     /**
@@ -17,12 +18,25 @@ public class NoteSequence {
      */
     private final int TEMPO = 0x51;
 
-    long myLength;  //Length, ticks
+    private long myTicksLength;  //Length, ticks
     double myDuration;  // Duration, seconds
 
+    /**
+     * Builds NoteSequence from MIDI file. Move all notes in single track
+     * Catches only NOTE_ON and NOTE_OFF events.
+     * Also catches one TEMPO event at the first MIDI tick.
+     * NB: Does not support tempo changes.
+     *
+     * @param midiInputFile input File
+     * @throws InvalidMidiDataException if:
+     *                                  1) cannot get length of file,
+     *                                  2) MIDI Sequence type is not PPQ (=> cannot calculate tempo in BPM),
+     *                                  3) Tempo changes during playback
+     * @throws IOException              if cannot open file
+     */
     public NoteSequence(@NotNull File midiInputFile) throws InvalidMidiDataException, IOException {
         mySequence = MidiSystem.getSequence(midiInputFile);
-        myLength = mySequence.getTickLength();
+        myTicksLength = mySequence.getTickLength();
         if (mySequence.getMicrosecondLength() == MidiFileFormat.UNKNOWN_LENGTH) {
             throw new InvalidMidiDataException("Unknown length");
         }
@@ -41,7 +55,30 @@ public class NoteSequence {
                 if (midiMessage instanceof MetaMessage) {
                     MetaMessage message = (MetaMessage) midiMessage;
                     if (message.getType() == TEMPO) {
-                        myTrack.add(new MidiEvent(new MetaMessage(TEMPO, message.getData(), message.getData().length), event.getTick()));
+                        if (mySequence.getDivisionType() != Sequence.PPQ) {
+                            throw new InvalidMidiDataException(
+                                    "Cannot get tempoInBPM, input MIDI Sequence must have divisionType = Sequence.PPQ");
+                        }
+
+                        long tick = event.getTick();
+                        if (tick > 0) {
+                            throw new InvalidMidiDataException(
+                                    "Tempo has been changed in the middle of MIDI file");
+                        }
+
+                        // Calculate BPM
+                        byte[] data = message.getData();
+                        long tempoInMPQ = (((long) data[0] & 0xff) << 16) |
+                                (((long) data[1] & 0xff) << 8) |
+                                (((long) data[2] & 0xff));
+
+                        myTempoInBPM = (int) Math.round(60.0 * 1e6 / tempoInMPQ);
+
+                        // Write tempo message
+                        MetaMessage tempoMessage = new MetaMessage(TEMPO, data, data.length);
+                        myTrack.add(new MidiEvent(tempoMessage, tick));
+
+
                     }
                 }
                 if (midiMessage instanceof ShortMessage) {
@@ -84,6 +121,8 @@ public class NoteSequence {
      */
     // TODO add note power threshold (=0 by default)
     public NoteSequence(@NotNull QuasiNotes quasiNotes, int tempoInBPM, int ticksPerQuarterNote) throws InvalidMidiDataException {
+        myTempoInBPM = tempoInBPM;
+
         int minMidiCode = quasiNotes.getMinMidiCode();
         double timeStep = quasiNotes.getTimeStep();
         ArrayList<double[]> noteSeries = quasiNotes.getNotePowerSeries();
@@ -105,6 +144,7 @@ public class NoteSequence {
         for (int timePoint = 0; timePoint < noteSeries.size(); timePoint++) {
             double[] power = noteSeries.get(timePoint);
             int tick = (int) Math.round(timePoint * timeStep / outputTimeStep);
+            myTicksLength = tick + 1;
             for (int noteIndex = 0; noteIndex < power.length; noteIndex++) {
                 int midiCode = noteIndex + minMidiCode;
                 if (power[noteIndex] > 0 && !currentNotes.contains(midiCode)) {
@@ -153,5 +193,19 @@ public class NoteSequence {
         }
 
         return result;
+    }
+
+    /**
+     * @return tempo in BPM.
+     */
+    public int getTempoInBPM() {
+        return myTempoInBPM;
+    }
+
+    /**
+     * @return length of sequence in MIDI ticks
+     */
+    public long getTicksLength() {
+        return myTicksLength;
     }
 }
