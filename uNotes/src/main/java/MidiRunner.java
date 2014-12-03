@@ -14,6 +14,7 @@ import java.util.ArrayList;
  */
 public class MidiRunner {
     public static void main(String[] args) throws FileNotFoundException {
+        double timeStart = System.nanoTime();
         File inputDir = new File("test", "music");
         File outputDir = new File("test", "output");
         outputDir.mkdir();
@@ -43,6 +44,9 @@ public class MidiRunner {
 
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            double timeEnd = System.nanoTime();
+            System.out.println("Total running time = " + (timeEnd - timeStart) / 1e9 + " seconds");
         }
     }
 }

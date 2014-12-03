@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 public class NoteExtractorRunner {
     public static void main(String[] args) {
+        double timeStart = System.nanoTime();
         int timeStepLength = 256;
         int windowLength = 4096;
 
@@ -76,6 +77,9 @@ public class NoteExtractorRunner {
 
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            double timeEnd = System.nanoTime();
+            System.out.println("Total running time = " + (timeEnd - timeStart) / 1e9 + " seconds");
         }
     }
 }
