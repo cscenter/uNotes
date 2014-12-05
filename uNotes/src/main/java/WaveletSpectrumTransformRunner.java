@@ -21,7 +21,7 @@ public class WaveletSpectrumTransformRunner {
         File inputDir = new File("test", "music");
         File outputDir = new File("test", "output");
         outputDir.mkdir();
-        String inputFileName = "a.wav";
+        String inputFileName = "gvp2.wav";
         File in = new File(inputDir, inputFileName);
 
         System.out.println("uNotes");
@@ -53,7 +53,7 @@ public class WaveletSpectrumTransformRunner {
             PrintStream outNotes2 = new PrintStream(new File(outputDir, inputFileName + ".wt2point.dat"));
 
             for (int i = 0; i < subSpectrum2.size(); ++i) {
-                double criticalNoise = QuasiNotes.getCriticalNoise(alignedPower.get(i), 0.03);
+                double criticalNoise = QuasiNotes.getCriticalNoise(alignedPower.get(i), 0.005);
                 for (int j = 0; j < subSpectrum2.get(i).length; j++) {
                     outNotes2.println((i * dt + t0) + "   " + counts[j] + "   " + subSpectrum2.get(i)[j] + "   " + criticalNoise);
                 }

@@ -4,6 +4,7 @@ import com.sun.istack.internal.NotNull;
 
 import javax.sound.sampled.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Vector;
 
 
@@ -155,5 +156,23 @@ public class TimeSeries {
 
     public int getSampleRate() {
         return mySampleRate;
+    }
+
+    public ArrayList<Double> getAlignedAmplitude(int startCount, int countsInRange) {
+        ArrayList<Double> alignedAmplitude = new ArrayList<Double>();
+        int i = startCount;
+        while (i < myFrameLen) {
+            double amplitude = 0;
+            int j = i - (countsInRange / 2);
+            int rightSide = Math.min(i + (countsInRange / 2), myFrameLen);
+            while (j < rightSide) {
+                amplitude += Math.abs(myTrack.elementAt(j));
+                ++j;
+            }
+            amplitude /= countsInRange;
+            alignedAmplitude.add(amplitude);
+            i += countsInRange;
+        }
+        return alignedAmplitude;
     }
 }

@@ -40,4 +40,8 @@ public final class NoteAlphabet {
     public int getMaxMidiCode() {
         return myMaxMidiCode;
     }
+
+    public int getSize() {
+        return myFrequencies.length;
+    }
 }

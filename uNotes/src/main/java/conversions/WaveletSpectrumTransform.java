@@ -69,7 +69,7 @@ public class WaveletSpectrumTransform implements Transformation {
             }
             myWaveletsArguments.add(arguments);
         }
-        /*
+        //
         myNormalizingFactor = new double[countsLength];
 
         for (int i = 0; i < myNormalizingFactor.length; ++i) {
@@ -78,7 +78,7 @@ public class WaveletSpectrumTransform implements Transformation {
                 myNormalizingFactor[i] += Math.exp(-1.0 * Math.pow(arguments[k], 2.0) / B);
             }
         }
-        */
+        //
         myWavelet = new ArrayList<Complex[]>();
         Complex[] section;
 
@@ -119,10 +119,11 @@ public class WaveletSpectrumTransform implements Transformation {
                     arg = arg.multiply(wav[k]);
                     waveletAmplitude = waveletAmplitude.add(arg);
                 }
-                //waveletAmplitude = waveletAmplitude.divide(myNormalizingFactor[i]);
-
+                waveletAmplitude = waveletAmplitude.divide(myNormalizingFactor[i]);
                 scalogramsSection[i] = Math.pow(waveletAmplitude.abs(), 2.0);
-                scalogramsSection[i] /= normalize;
+
+                //scalogramsSection[i] = Math.pow(waveletAmplitude.abs(), 2.0);
+                //scalogramsSection[i] /= normalize;
             }
 
             currentSpectrum.add(scalogramsSection);
