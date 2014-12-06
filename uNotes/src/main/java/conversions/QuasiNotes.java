@@ -161,6 +161,8 @@ public class QuasiNotes {
 
         trimming(0.1);
 
+        timeSmooth(60.0 / 140.0 / 4);
+
     }
 
     /**
@@ -275,6 +277,7 @@ public class QuasiNotes {
             int position = 0;
             boolean isPlayed = false;
             while (position < myNotePowerSeries.size()) {
+                System.out.print(position + " " + j);
                 int noteBegin = takeNoteBegin(j, position);
                 if ((isPlayed) && ((noteBegin - position) < minDuration)) {
                     fillNote(j, position, noteBegin);
@@ -282,6 +285,7 @@ public class QuasiNotes {
                     isPlayed = true;
                 } else {
                     isPlayed = false;
+                    position = noteBegin;
                 }
                 int noteEnd = takeNoteEnd(j, position);
                 if (((noteEnd - position) > durationInCounts) || (isPlayed)) {
@@ -311,10 +315,10 @@ public class QuasiNotes {
 
     private void clearNote(int noteCode, int beginPos, int endPos) {
         if (beginPos > endPos) {
-            throw new IllegalArgumentException("beginPos must be less then endPos");
+            throw new IllegalArgumentException("beginPos must be less then endPos " + beginPos + " " + endPos);
         }
-        if ((beginPos < 0) || (endPos < 1)) {
-            throw new IllegalArgumentException("Positions must be positive");
+        if ((beginPos < 0) || (endPos < 0)) {
+            throw new IllegalArgumentException("Positions must be positive beginPos = " + beginPos + " endPos = " + endPos);
         }
         for (int i = beginPos; i < endPos; ++i) {
             myNotePowerSeries.get(i)[noteCode] = 0;
@@ -323,10 +327,10 @@ public class QuasiNotes {
 
     private void fillNote(int noteCode, int beginPos, int endPos) {
         if (beginPos > endPos) {
-            throw new IllegalArgumentException("beginPos must be less then endPos");
+            throw new IllegalArgumentException("beginPos must be less then endPos " + beginPos + " " + endPos);
         }
-        if ((beginPos < 0) || (endPos < 1)) {
-            throw new IllegalArgumentException("Positions must be positive");
+        if ((beginPos < 0) || (endPos < 0)) {
+            throw new IllegalArgumentException("Positions must be positive beginPos = " + beginPos + " endPos = " + endPos);
         }
         for (int i = beginPos; i < endPos; ++i) {
             myNotePowerSeries.get(i)[noteCode] = 0.5;
