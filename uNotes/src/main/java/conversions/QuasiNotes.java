@@ -158,6 +158,9 @@ public class QuasiNotes {
         relativeValidation();
 
         secondaryValidation(alignedPower);
+
+        trimming(0.1);
+
     }
 
     /**
@@ -214,9 +217,9 @@ public class QuasiNotes {
         for (int i = 0; i < myPeaks.size(); ++i) {
             Peak[] peakSlice = myPeaks.get(i);
             double maxAmplitude = -1000;
-            for (int j = 0; j < peakSlice.length; ++j) {
-                if ((peakSlice[j] != null) && (peakSlice[j].power > maxAmplitude)) {
-                    maxAmplitude = peakSlice[j].power;
+            for (Peak aPeak : peakSlice) {
+                if ((aPeak != null) && (aPeak.power > maxAmplitude)) {
+                    maxAmplitude = aPeak.power;
                 }
             }
             double[] notePowerSlice = myNotePowerSeries.get(i);
@@ -256,7 +259,80 @@ public class QuasiNotes {
     /**
      * This method trim our probability for some level
      */
-    private void trimming() {}
+    private void trimming(double probabilityLevel) {
+        for (double[] notePowerSlice : myNotePowerSeries) {
+            for (int j = 0; j < notePowerSlice.length; ++j) {
+                if (notePowerSlice[j] < probabilityLevel) {
+                    notePowerSlice[j] = 0.0;
+                }
+            }
+        }
+    }
+
+    private void timeSmooth(double minDuration) {
+        int durationInCounts = (int) (minDuration / myTimeStep);
+        for (int j = 0; j < myNoteAlphabet.getSize(); ++j) {
+            int position = 0;
+            boolean isPlayed = false;
+            while (position < myNotePowerSeries.size()) {
+                int noteBegin = takeNoteBegin(j, position);
+                if ((isPlayed) && ((noteBegin - position) < minDuration)) {
+                    fillNote(j, position, noteBegin);
+                    position = noteBegin;
+                    isPlayed = true;
+                } else {
+                    isPlayed = false;
+                }
+                int noteEnd = takeNoteEnd(j, position);
+                if (((noteEnd - position) > durationInCounts) || (isPlayed)) {
+                    position = noteEnd;
+                } else {
+                    clearNote(j, position, noteEnd);
+                    position = noteEnd;
+                    isPlayed = false;
+                }
+            }
+        }
+    }
+
+    private int takeNoteBegin(int noteCode, int position) {
+        while ((position < myNotePowerSeries.size()) && (myNotePowerSeries.get(position)[noteCode] < 1.0e-8)) {
+            ++position;
+        }
+        return position;
+    }
+
+    private int takeNoteEnd(int noteCode, int position) {
+        while ((position < myNotePowerSeries.size()) && (myNotePowerSeries.get(position)[noteCode] > 1.0e-8)) {
+            ++position;
+        }
+        return position;
+    }
+
+    private void clearNote(int noteCode, int beginPos, int endPos) {
+        if (beginPos > endPos) {
+            throw new IllegalArgumentException("beginPos must be less then endPos");
+        }
+        if ((beginPos < 0) || (endPos < 1)) {
+            throw new IllegalArgumentException("Positions must be positive");
+        }
+        for (int i = beginPos; i < endPos; ++i) {
+            myNotePowerSeries.get(i)[noteCode] = 0;
+        }
+    }
+
+    private void fillNote(int noteCode, int beginPos, int endPos) {
+        if (beginPos > endPos) {
+            throw new IllegalArgumentException("beginPos must be less then endPos");
+        }
+        if ((beginPos < 0) || (endPos < 1)) {
+            throw new IllegalArgumentException("Positions must be positive");
+        }
+        for (int i = beginPos; i < endPos; ++i) {
+            myNotePowerSeries.get(i)[noteCode] = 0.5;
+        }
+    }
+
 
     public int getMaxMidiCode() {
         return myMaxMidiCode;
