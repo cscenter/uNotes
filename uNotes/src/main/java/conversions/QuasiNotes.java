@@ -4,6 +4,7 @@ import conversions.notes.MidiHelper;
 import conversions.notes.NoteAlphabet;
 import conversions.peaks.Peak;
 import conversions.peaks.PeakExtractor;
+import org.apache.commons.math3.stat.descriptive.moment.Variance;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -26,8 +27,6 @@ public class QuasiNotes {
     private ArrayList<double[]> myWaveletPower;
 
     public double myAbsolutePowerThreshold = -20;
-
-    //private ArrayList<double[]> myNotesSeries = new ArrayList<double[]>();
 
     @Deprecated
     public QuasiNotes(Spectrum spectrum) throws FileNotFoundException {
@@ -71,14 +70,10 @@ public class QuasiNotes {
         pex.extract();
         ArrayList<ArrayList<Peak>> peaks = pex.getPeaks();
 
-
         for (int i = 0; i < (int) (spectrum.getTimeZeroPoint() / myTimeStep + 1.0e-7); ++i) {
             myNotePowerSeries.add(new double[notes.length]);
         }
 
-        //
-        //PrintStream outNotes = new PrintStream(new File(new File("test", "output"), myStatisticalSignificance + "logger.dat"));
-        //
         double criticalNoise = 0;
         for (int i = 0; i < peaks.size(); ++i) {
             criticalNoise += getCriticalNoise(alignedPower.get(i), myStatisticalSignificance);
@@ -87,21 +82,6 @@ public class QuasiNotes {
 
         for (int i = 0; i < peaks.size(); ++i) {
             double[] notePowerSlice = new double[notes.length];
-            //double criticalNoise = getCriticalNoise(alignedPower.get(i), myStatisticalSignificance);
-
-            /*
-            double mean = 0;
-            for (int j = 0; j < power.get(i).length; ++j) {
-                mean += power.get(i)[j];
-            }
-            mean /= power.get(i).length;
-            double var = 0;
-            for (int j = 0; j < power.get(i).length; ++j) {
-                var += Math.pow(power.get(i)[j] - mean, 2.0);
-            }
-            var /= (power.get(i).length - 1);
-            outNotes.println(myNotePowerSeries.size() * dt + "   " + criticalNoise + "  " + mean + "  " + Math.sqrt(var));
-            */
 
             for (int j = 0; j < peaks.get(i).size(); j++) {
                 Peak cur = peaks.get(i).get(j);
@@ -166,10 +146,6 @@ public class QuasiNotes {
             myAlignedAmplitude.add(0.0);
         }
 
-        //System.out.print(myPeaks.size() + "   " + myAlignedAmplitude.size());
-
-        //ArrayList<Double> notes = myNoteAlphabet.getFrequencies();
-
         WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(spectrum, myNoteAlphabet.getFrequencies());
         myWaveletPower = noteGetter.spectrumTransformWithCounts(alignedPower);
 
@@ -194,21 +170,13 @@ public class QuasiNotes {
 
             Arrays.fill(peakSlice, null);
 
-            //double[] noteAmplitudeSlice = new double[myNoteAlphabet.getSize()];
-
-            //Arrays.fill(noteAmplitudeSlice, -1000.0);
-
             for (int j = 0; j < allPeaks.get(i).size(); j++) {
                 Peak cur = allPeaks.get(i).get(j);
                 int noteMidiCode = MidiHelper.getMidiCode(cur.center);
                 //  If peak frequency if too high or too low:
                 if (noteMidiCode >= myNoteAlphabet.getMinMidiCode() && noteMidiCode <= myNoteAlphabet.getMaxMidiCode()) {
                     int noteIndex = noteMidiCode - myNoteAlphabet.getMinMidiCode();
-                    /*
-                    if (noteAmplitudeSlice[noteIndex] < cur.power) {
-                        noteAmplitudeSlice[noteIndex] = cur.power;
-                    }
-                    */
+
                     if ((peakSlice[noteIndex] == null) || (peakSlice[noteIndex].power < cur.power)) {
                         peakSlice[noteIndex] = cur;
                     }
@@ -273,16 +241,22 @@ public class QuasiNotes {
     }
 
     private void secondaryValidation(ArrayList<double[]> alignedPower) {
+        Variance varianceEvaluator = new Variance();
         for (int i = 0; i < myWaveletPower.size(); ++i) {
             double[] waveletSlice = myWaveletPower.get(i);
             double[] notePowerSlice = myNotePowerSeries.get(i);
             double[] alignedSlice = alignedPower.get(i);
             for (int j = 0; j < waveletSlice.length; ++j) {
-                double exponent = Math.exp(-alignedSlice.length * waveletSlice[j] / getVariance(alignedSlice));
+                double exponent = Math.exp(-alignedSlice.length * waveletSlice[j] / varianceEvaluator.evaluate(alignedSlice));
                 notePowerSlice[j] *= Math.exp(-exponent / myStatisticalSignificance);
             }
         }
     }
+
+    /**
+     * This method trim our probability for some level
+     */
+    private void trimming() {}
 
     public int getMaxMidiCode() {
         return myMaxMidiCode;
@@ -300,21 +274,13 @@ public class QuasiNotes {
         return myNotePowerSeries;
     }
 
-    public static double getVariance(double[] selection) {
-        double variance = 0;
-        for (double value : selection) {
-            variance += (value * value);
-        }
-        variance = variance / (double) (selection.length - 1);
-        return variance;
-    }
-
     public static double getCriticalNoise(double[] selection, double statisticalSignificance) {
+        Variance varianceEvaluator = new Variance();
         if ((statisticalSignificance > 1.0) || (statisticalSignificance < 0.0)) {
             throw new IllegalArgumentException("statisticalSignificance must belong to the interval [0, 1]");
         }
 
-        double variance = getVariance(selection);
+        double variance = varianceEvaluator.evaluate(selection);
 
         return (-variance * Math.log(statisticalSignificance) / (double) selection.length);
     }

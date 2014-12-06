@@ -16,11 +16,11 @@ public class PeakExtractor {    //TODO rename
         this.myFreqStep = freqStep;
     }
 
-    public void loadSpectrum(@NotNull ArrayList<double[]> spectrum) {
+    public void loadSpectrum(@NotNull ArrayList<double[]> spectrum) { //TODO merge with this.loadSpectrum
         this.mySpectrum = spectrum;
     }
 
-    public void extract() {
+    public void extract() {  //TODO merge with this.loadSpectrum
         int fsize = mySpectrum.get(0).length;
         int tsize = mySpectrum.size();
         boolean decline = false;
