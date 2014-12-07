@@ -151,6 +151,8 @@ public class QuasiNotes {
 
         basicValidation();
 
+        octaveValidation(2.0);
+
         timeValidation();
 
         amplitudeValidation();
@@ -159,14 +161,14 @@ public class QuasiNotes {
 
         secondaryValidation(alignedPower);
 
-        trimming(0.1);
+        trimming(0.10);
 
         timeSmooth(60.0 / 140.0 / 4);
 
     }
 
     /**
-     * This method extract Peaks which match the muNoteAlphabet to myPeaks
+     * This method extract Peaks which match the myNoteAlphabet to myPeaks
      */
     private void extractMyPeaks(ArrayList<ArrayList<Peak>> allPeaks) {
         myPeaks = new ArrayList<Peak[]>();
@@ -192,22 +194,36 @@ public class QuasiNotes {
     }
 
     private void basicValidation() {
-        for (int i = 0; i < myPeaks.size(); ++i) {
+        for (Peak[] peakSlice : myPeaks) {
             double[] notePowerSlice = new double[myNoteAlphabet.getSize()];
-            Peak[] peakSlice = myPeaks.get(i);
 
             for (int j = 0; j < peakSlice.length; j++) {
                 if ((peakSlice[j] != null) && (peakSlice[j].power > myAbsolutePowerThreshold)) {
                     notePowerSlice[j] = 1.0;
                 }
             }
-
             myNotePowerSeries.add(notePowerSlice);
         }
     }
 
+    private void octaveValidation(double factor) {
+        for (int i = 0; i < myNotePowerSeries.size(); ++i) {
+            double[] notePowerSlice = myNotePowerSeries.get(i);
+            Peak[] peakSlice = myPeaks.get(i);
+            for (int j = 0; j + 12 < notePowerSlice.length; ++j) {
+                if (peakSlice[j] != null) {
+                    if (peakSlice[j + 12] == null) {
+                        notePowerSlice[j] /= 10.0;  //  TODO
+                    } else {
+                        notePowerSlice[j] *= Math.exp(-factor * (peakSlice[j].powerRel) / (peakSlice[j + 12].powerRel));
+                    }
+                }
+            }
+        }
+    }
+
     private void timeValidation() {
-        for (int i = 0; i < myAlignedAmplitude.size(); ++i) {
+        for (int i = 0; i < myNotePowerSeries.size(); ++i) {
             double[] notePowerSlice = myNotePowerSeries.get(i);
             for (int j = 0; j < notePowerSlice.length; ++j) {
                 notePowerSlice[j] *= Math.exp(-0.005 / myAlignedAmplitude.get(i));
@@ -273,41 +289,38 @@ public class QuasiNotes {
 
     private void timeSmooth(double minDuration) {
         int durationInCounts = (int) (minDuration / myTimeStep);
-        for (int j = 0; j < myNoteAlphabet.getSize(); ++j) {
+        for (int noteIndex = 0; noteIndex < myNoteAlphabet.getSize(); ++noteIndex) {
             int position = 0;
             boolean isPlayed = false;
             while (position < myNotePowerSeries.size()) {
-                System.out.print(position + " " + j);
-                int noteBegin = takeNoteBegin(j, position);
+                int noteBegin = takeNoteBegin(noteIndex, position);
                 if ((isPlayed) && ((noteBegin - position) < minDuration)) {
-                    fillNote(j, position, noteBegin);
-                    position = noteBegin;
-                    isPlayed = true;
-                } else {
-                    isPlayed = false;
-                    position = noteBegin;
+                    fillNote(noteIndex, position, noteBegin);
                 }
-                int noteEnd = takeNoteEnd(j, position);
-                if (((noteEnd - position) > durationInCounts) || (isPlayed)) {
-                    position = noteEnd;
-                } else {
-                    clearNote(j, position, noteEnd);
-                    position = noteEnd;
-                    isPlayed = false;
+                position = takeNoteEnd(noteIndex, noteBegin);
+                isPlayed = true;
+            }
+            position = 0;
+            while (position < myNotePowerSeries.size()) {
+                int noteBegin = takeNoteBegin(noteIndex, position);
+                int noteEnd = takeNoteEnd(noteIndex, noteBegin);
+                position = noteEnd;
+                if (noteEnd - noteBegin < minDuration) {
+                    clearNote(noteIndex, noteBegin, noteEnd);
                 }
             }
         }
     }
 
     private int takeNoteBegin(int noteCode, int position) {
-        while ((position < myNotePowerSeries.size()) && (myNotePowerSeries.get(position)[noteCode] < 1.0e-8)) {
+        while ((position < myNotePowerSeries.size()) && (myNotePowerSeries.get(position)[noteCode] < 1.0e-9)) {
             ++position;
         }
         return position;
     }
 
     private int takeNoteEnd(int noteCode, int position) {
-        while ((position < myNotePowerSeries.size()) && (myNotePowerSeries.get(position)[noteCode] > 1.0e-8)) {
+        while ((position < myNotePowerSeries.size()) && (myNotePowerSeries.get(position)[noteCode] > 1.0e-9)) {
             ++position;
         }
         return position;

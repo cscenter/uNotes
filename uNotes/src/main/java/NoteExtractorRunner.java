@@ -5,7 +5,9 @@ import conversions.TimeSeries;
 import conversions.fourier.BlackmanWindow;
 import conversions.fourier.STFT;
 import conversions.notes.Note;
+import conversions.notes.NoteSequence;
 
+import javax.sound.midi.MidiSystem;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.File;
@@ -22,7 +24,7 @@ public class NoteExtractorRunner {
         File outputDir = new File("test", "output");
         outputDir.mkdir();
 
-        String inputFileName = "gvp2.wav";
+        String inputFileName = "Rondo alla Turka.wav";
         File in = new File(inputDir, inputFileName);
 
         System.out.println("uNotes");
@@ -56,7 +58,7 @@ public class NoteExtractorRunner {
             double relativePowerThreshold = 20;
             double powerThreshold = 0;
             double statisticalSignificance = 0.003;
-            double absolutePowerThreshold = -20;
+            double absolutePowerThreshold = 0;
 
             PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".npw.dat"));
 
@@ -73,12 +75,12 @@ public class NoteExtractorRunner {
             }
             //
 
-            /*
+            //
             //MIDI output
             File outMidi = new File(outputDir, inputFileName + ".npw.mid");
             NoteSequence noteSequence = new NoteSequence(quasiNotes);
             MidiSystem.write(noteSequence.getMidiSequence(), 0, outMidi);
-            */
+            //
             ArrayList<Double> alignedAmplitude = series.getAlignedAmplitude(windowLength / 2, timeStepLength);
             PrintStream outAmplitude = new PrintStream(new File(outputDir, inputFileName + ".amp.dat"));
             double[] hist = histogram(alignedAmplitude, 20);
@@ -104,11 +106,9 @@ public class NoteExtractorRunner {
         if (n < 1) {
             throw new IllegalArgumentException("n must be positive");
         }
-        double min;
-        double max;
         double[] answer = new double[n];
-        min = value.get(0);
-        max = value.get(0);
+        double min = value.get(0);
+        double max = value.get(0);
         for (int i = 1; i < value.size(); ++i) {
             if (value.get(i) < min) {
                 min = value.get(i);
@@ -118,13 +118,11 @@ public class NoteExtractorRunner {
             }
         }
         double delta = (max - min) / n;
-        System.out.println(delta);
         for (int i = 0; i < value.size(); ++i) {
             boolean flag = true;
             int j = 0;
             while ((j < n) && (flag)) {
                 if ((value.get(i) > (min - 1.0e-9 + j * delta)) && (value.get(i) < (min + 1.0e-9 + (j + 1) * delta))) {
-                    System.out.println(j);
                     answer[j] += 1.0;
                     flag = false;
                 }
