@@ -2,19 +2,23 @@ package conversions.notes;
 
 import java.util.ArrayList;
 
+/**
+ * This class provides static methods to compare note sequences.
+ */
 public class NoteSequenceComparator {
     /**
-     * This method calculates distance between two note sequences (proportion of different notes).
-     * The first sequence
+     * This method calculates error of first note sequence relative to second note sequence.
+     * <p/>
+     * At every time step we look at every note and check whether it is played/muted in both sequences.
      *
      * @param sequence             given sequence
-     * @param expectedSequence     true sequence,
+     * @param expectedSequence     true sequence
      * @param timeSeriesLength     number of points
      * @param minMidiCode          lowest note
      * @param maxMidiCode          highest note
-     * @param falsePositivePenalty penalty for false positive (if the wrong note is played in sequence). = 1.0 by default.
-     * @param falseNegativePenalty penalty for false positive (if the expected note is not played in sequence) = 1.0 by default.
-     * @return normalized error of sequence with respect to expected sequence.
+     * @param falsePositivePenalty penalty for false positives (if the wrong note is played in sequence). = 1.0 by default.
+     * @param falseNegativePenalty penalty for false negatives (if the expected note is not played in sequence) = 1.0 by default.
+     * @return normalized error of sequence relative to expected sequence.
      */
     public static double calculateError(NoteSequence sequence, NoteSequence expectedSequence, int timeSeriesLength,
                                         int minMidiCode, int maxMidiCode,
@@ -37,15 +41,16 @@ public class NoteSequenceComparator {
     }
 
     /**
-     * This method calculates distance between two note sequences (proportion of different notes).
-     * The first sequence
+     * This method calculates error of first note sequence relative to second note sequence.
+     * <p/>
+     * At every time step we look at every note and check whether it is played/muted in both sequences.
      *
      * @param sequence             given sequence
-     * @param expectedSequence     true sequence,
+     * @param expectedSequence     true sequence
      * @param timeSeriesLength     number of points
-     * @param falsePositivePenalty penalty for false positive (if the wrong note is played in sequence)
-     * @param falseNegativePenalty penalty for false positive (if the expected note is not played in sequence)
-     * @return normalized error of sequence with respect to expected sequence.
+     * @param falsePositivePenalty penalty for false positives (if the wrong note is played in sequence). = 1.0 by default.
+     * @param falseNegativePenalty penalty for false negatives (if the expected note is not played in sequence) = 1.0 by default.
+     * @return normalized error of sequence relative to expected sequence.
      */
     public static double calculateError(NoteSequence sequence, NoteSequence expectedSequence, int timeSeriesLength,
                                         double falsePositivePenalty, double falseNegativePenalty) {
@@ -55,15 +60,16 @@ public class NoteSequenceComparator {
     }
 
     /**
-     * This method calculates distance between two note sequences (proportion of different notes).
-     * The first sequence
+     * This method calculates error of first note sequence relative to second note sequence.
+     * <p/>
+     * At every time step we look at every note and check whether it is played/muted in both sequences.
      *
-     * @param sequence         given sequence
-     * @param expectedSequence true sequence,
-     * @param timeSeriesLength number of points
-     * @param minMidiCode      lowest note
-     * @param maxMidiCode      highest note
-     * @return normalized error of sequence with respect to expected sequence.
+     * @param sequence             given sequence
+     * @param expectedSequence     true sequence
+     * @param timeSeriesLength     number of points
+     * @param minMidiCode          lowest note
+     * @param maxMidiCode          highest note
+     * @return normalized error of sequence relative to expected sequence.
      */
     public static double calculateError(NoteSequence sequence, NoteSequence expectedSequence, int timeSeriesLength,
                                         int minMidiCode, int maxMidiCode) {
@@ -72,13 +78,14 @@ public class NoteSequenceComparator {
     }
 
     /**
-     * This method calculates distance between two note sequences (proportion of different notes).
-     * The first sequence
+     * This method calculates error of first note sequence relative to second note sequence.
+     * <p/>
+     * At every time step we look at every note and check whether it is played/muted in both sequences.
      *
-     * @param sequence         given sequence
-     * @param expectedSequence true sequence,
-     * @param timeSeriesLength number of points
-     * @return normalized error of sequence with respect to expected sequence.
+     * @param sequence             given sequence
+     * @param expectedSequence     true sequence
+     * @param timeSeriesLength     number of points
+     * @return normalized error of sequence relative to expected sequence.
      */
     public static double calculateError(NoteSequence sequence, NoteSequence expectedSequence, int timeSeriesLength) {
         return calculateError(sequence, expectedSequence, timeSeriesLength,
@@ -89,7 +96,7 @@ public class NoteSequenceComparator {
     /**
      * This method calculates distance between two note sequences (proportion of different notes).
      * <p/>
-     * At every time step we look at every note
+     * At every time step we look at every note and check whether it is played/muted in both sequences.
      *
      * @param x                first note sequence
      * @param y                second first note sequence
