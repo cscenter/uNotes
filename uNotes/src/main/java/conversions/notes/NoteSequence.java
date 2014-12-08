@@ -16,7 +16,11 @@ public class NoteSequence {
     /**
      * MIDI command for tempo change
      */
-    private final int TEMPO = 0x51;
+    private static final int TEMPO = 0x51;
+    /**
+     * MIDI max. velocity for NOTE_ON and NOTE_OFF events
+     */
+    private static final int MAX_VELOCITY = 127;
 
     private long myTicksLength;  //Length, ticks
     double myDuration;  // Duration, seconds
@@ -50,45 +54,29 @@ public class NoteSequence {
         for (Track track : tracks) {
             for (int i = 0; i < track.size(); i++) {
                 MidiEvent event = track.get(i);
+                long tick = event.getTick();
                 myTrack.add(event);
                 MidiMessage midiMessage = event.getMessage();
                 if (midiMessage instanceof MetaMessage) {
                     MetaMessage message = (MetaMessage) midiMessage;
                     if (message.getType() == TEMPO) {
-                        if (mySequence.getDivisionType() != Sequence.PPQ) {
-                            throw new InvalidMidiDataException(
-                                    "Cannot get tempoInBPM, input MIDI Sequence must have divisionType = Sequence.PPQ");
-                        }
-
-                        long tick = event.getTick();
                         if (tick > 0) {
                             throw new InvalidMidiDataException(
                                     "Tempo has been changed in the middle of MIDI file");
                         }
 
                         // Calculate BPM
-                        byte[] data = message.getData();
-                        long tempoInMPQ = (((long) data[0] & 0xff) << 16) |
-                                (((long) data[1] & 0xff) << 8) |
-                                (((long) data[2] & 0xff));
-
-                        myTempoInBPM = (int) Math.round(60.0 * 1e6 / tempoInMPQ);
-
-                        // Write tempo message
-                        MetaMessage tempoMessage = new MetaMessage(TEMPO, data, data.length);
-                        myTrack.add(new MidiEvent(tempoMessage, tick));
-
-
+                        myTempoInBPM = calculateBPM(message);
+                        myTrack.add(new MidiEvent(message, tick));
                     }
-                }
-                if (midiMessage instanceof ShortMessage) {
+                } else if (midiMessage instanceof ShortMessage) {
                     ShortMessage message = (ShortMessage) midiMessage;
                     int command = message.getCommand();
                     int key = message.getData1();
                     int velocity = message.getData2();
 
                     if (command == ShortMessage.NOTE_ON && velocity == 0) { //Equivalent to NOTE_OFF
-                        myTrack.add(new MidiEvent(new ShortMessage(ShortMessage.NOTE_OFF, key, 127), event.getTick()));
+                        myTrack.add(new MidiEvent(new ShortMessage(ShortMessage.NOTE_OFF, key, MAX_VELOCITY), tick));
                     } else if (command == ShortMessage.NOTE_ON || command == ShortMessage.NOTE_OFF) {
                         myTrack.add(event);
                     }
@@ -97,6 +85,22 @@ public class NoteSequence {
             // delete this track from the sequence
             mySequence.deleteTrack(track);
         }
+    }
+
+    private int calculateBPM(MetaMessage message) throws InvalidMidiDataException {
+        if (message.getType() != TEMPO) {
+            throw new InvalidMidiDataException("TEMPO message expected");
+        }
+        if (mySequence.getDivisionType() != Sequence.PPQ) {
+            throw new InvalidMidiDataException(
+                    "Cannot get tempoInBPM, input MIDI Sequence must have divisionType = Sequence.PPQ");
+        }
+        byte[] data = message.getData();
+        long tempoInMPQ = (((long) data[0] & 0xff) << 16) |
+                (((long) data[1] & 0xff) << 8) |
+                (((long) data[2] & 0xff));
+
+        return (int) Math.round(60.0 * 1e6 / tempoInMPQ);
     }
 
     /**
@@ -120,6 +124,7 @@ public class NoteSequence {
      * @throws InvalidMidiDataException
      */
     // TODO add note power threshold (=0 by default)
+    // TODO ingnore short notes?
     public NoteSequence(@NotNull QuasiNotes quasiNotes, int tempoInBPM, int ticksPerQuarterNote) throws InvalidMidiDataException {
         myTempoInBPM = tempoInBPM;
 
@@ -127,28 +132,23 @@ public class NoteSequence {
         double timeStep = quasiNotes.getTimeStep();
         ArrayList<double[]> noteSeries = quasiNotes.getNotePowerSeries();
 
+        // time step in seconds = length of shortest note
         double outputTimeStep = 60.0 / tempoInBPM / ticksPerQuarterNote;
 
         mySequence = new Sequence(Sequence.PPQ, ticksPerQuarterNote);
         myTrack = mySequence.createTrack();
-        //Set tempo
-        int tempoInMPQ = (int) Math.round(60.0 / tempoInBPM * 1e6);  //  tempo in microseconds per quarter
-        byte[] data = new byte[3];
-        data[0] = (byte) ((tempoInMPQ >> 16) & 0xFF);
-        data[1] = (byte) ((tempoInMPQ >> 8) & 0xFF);
-        data[2] = (byte) (tempoInMPQ & 0xFF);
-        MetaMessage tempoMessage = new MetaMessage(TEMPO, data, data.length);
+        MetaMessage tempoMessage = buildTempoMessage(tempoInBPM);
+
         myTrack.add(new MidiEvent(tempoMessage, 0));
 
         HashSet<Integer> currentNotes = new HashSet<Integer>();
         for (int timePoint = 0; timePoint < noteSeries.size(); timePoint++) {
             double[] power = noteSeries.get(timePoint);
             int tick = (int) Math.round(timePoint * timeStep / outputTimeStep);
-            myTicksLength = tick + 1;
             for (int noteIndex = 0; noteIndex < power.length; noteIndex++) {
                 int midiCode = noteIndex + minMidiCode;
                 if (power[noteIndex] > 0 && !currentNotes.contains(midiCode)) {
-                    myTrack.add(new MidiEvent(new ShortMessage(ShortMessage.NOTE_ON, midiCode, 127), tick));
+                    myTrack.add(new MidiEvent(new ShortMessage(ShortMessage.NOTE_ON, midiCode, MAX_VELOCITY), tick));
                     currentNotes.add(midiCode);
                 } else if (power[noteIndex] <= 0 && currentNotes.contains(midiCode)) {
                     myTrack.add(new MidiEvent(new ShortMessage(ShortMessage.NOTE_OFF, midiCode, 0), tick));
@@ -156,6 +156,21 @@ public class NoteSequence {
                 }
             }
         }
+        myTicksLength = (int) Math.round((noteSeries.size() - 1) * timeStep / outputTimeStep);
+    }
+
+    private static MetaMessage buildTempoMessage(int tempoInBPM) throws InvalidMidiDataException {
+        //Set tempo
+        int tempoInMPQ = tempoMPQToBPM(tempoInBPM);
+        byte[] data = new byte[3];
+        data[0] = (byte) ((tempoInMPQ >> 16) & 0xFF);
+        data[1] = (byte) ((tempoInMPQ >> 8) & 0xFF);
+        data[2] = (byte) (tempoInMPQ & 0xFF);
+        return new MetaMessage(TEMPO, data, data.length);
+    }
+
+    private static int tempoMPQToBPM(int tempoInBPM) {
+        return (int) Math.round(60.0 / tempoInBPM * 1e6);
     }
 
     public Sequence getMidiSequence() {
@@ -172,7 +187,7 @@ public class NoteSequence {
         int prevIndex = 0;
         for (int i = 0; i < myTrack.size(); i++) {
             MidiEvent event = myTrack.get(i);
-            int currIndex = (new Double(event.getTick() * step)).intValue();
+            int currIndex = new Double(event.getTick() * step).intValue();
             for (int j = prevIndex; j < currIndex; j++) {
                 double[] notesArray = new double[MidiHelper.MIDI_CODES_COUNT];
                 for (Integer note : currentNotes) {
