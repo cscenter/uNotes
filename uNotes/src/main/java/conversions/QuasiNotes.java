@@ -108,15 +108,15 @@ public class QuasiNotes {
 
     public QuasiNotes(TimeSeries series, int startCount, int countsInRange, Spectrum spectrum,
                       double relativePowerThreshold, double powerThreshold, double statisticalSignificance,
-                      double absolutePowerThreshold) throws FileNotFoundException {
+                      double absolutePowerThreshold, double firstOvertoneFactor) throws FileNotFoundException {
         this(series, startCount, countsInRange, spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE,
-                relativePowerThreshold, powerThreshold, statisticalSignificance, absolutePowerThreshold);   //all MIDI notes (from C-1 to G9)
+                relativePowerThreshold, powerThreshold, statisticalSignificance, absolutePowerThreshold, firstOvertoneFactor);   //all MIDI notes (from C-1 to G9)
     }
 
     public QuasiNotes(TimeSeries series, int startCount, int countsInRange, Spectrum spectrum,
                       int minMidiCode, int maxMidiCode,
                       double relativePowerThreshold, double powerThreshold, double statisticalSignificance,
-                      double absolutePowerThreshold) {
+                      double absolutePowerThreshold, double firstOvertoneFactor) {
         myMinMidiCode = minMidiCode;
         myMaxMidiCode = maxMidiCode;
         myTimeStep = spectrum.getTimeStep();
@@ -151,7 +151,7 @@ public class QuasiNotes {
 
         basicValidation();
 
-        octaveValidation(2.0);
+        octaveValidation(firstOvertoneFactor);
 
         timeValidation();
 
@@ -206,7 +206,7 @@ public class QuasiNotes {
         }
     }
 
-    private void octaveValidation(double factor) {
+    private void octaveValidation(double firstOvertoneFactor) {
         for (int i = 0; i < myNotePowerSeries.size(); ++i) {
             double[] notePowerSlice = myNotePowerSeries.get(i);
             Peak[] peakSlice = myPeaks.get(i);
@@ -215,7 +215,7 @@ public class QuasiNotes {
                     if (peakSlice[j + 12] == null) {
                         notePowerSlice[j] /= 10.0;  //  TODO
                     } else {
-                        notePowerSlice[j] *= Math.exp(-factor * (peakSlice[j].powerRel) / (peakSlice[j + 12].powerRel));
+                        notePowerSlice[j] *= Math.exp(1 - firstOvertoneFactor * (peakSlice[j].powerRel) / (peakSlice[j + 12].powerRel));
                     }
                 }
             }

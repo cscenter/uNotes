@@ -55,16 +55,17 @@ public class NoteExtractorRunner {
             */
 
             //
-            double relativePowerThreshold = 20;
-            double powerThreshold = 0;
-            double statisticalSignificance = 0.003;
+            double relativePowerThreshold = 15;
+            double powerThreshold = 5;
+            double statisticalSignificance = 0.01;
             double absolutePowerThreshold = 0;
+            double firstOvertoneFactor = 0.5;
 
             PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".npw.dat"));
 
             QuasiNotes quasiNotes = new QuasiNotes(series, windowLength / 2, timeStepLength,
                     spectrum, Note.C.midiCode(1), Note.B.midiCode(6), relativePowerThreshold,
-                    powerThreshold, statisticalSignificance, absolutePowerThreshold);
+                    powerThreshold, statisticalSignificance, absolutePowerThreshold, firstOvertoneFactor);
             ArrayList<double[]> notePower = quasiNotes.getNotePowerSeries();
             for (int i = 0; i < notePower.size(); ++i) {
                 outNotes.print(i * dt + " ");
@@ -78,6 +79,7 @@ public class NoteExtractorRunner {
             //
             //MIDI output
             File outMidi = new File(outputDir, inputFileName + ".npw.mid");
+            //NoteSequence noteSequence = new NoteSequence(quasiNotes, 140, 4);
             NoteSequence noteSequence = new NoteSequence(quasiNotes);
             MidiSystem.write(noteSequence.getMidiSequence(), 0, outMidi);
             //
