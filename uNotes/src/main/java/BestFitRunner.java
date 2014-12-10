@@ -93,8 +93,8 @@ public class BestFitRunner {
                                     NoteSequence noteSequence = new NoteSequence(quasiNotes, tempoInBPM, ticksPerQuarterNote);
                                     int length = (int) inputNoteSequence.getTicksLength();
 
-                                    double distance = NoteSequenceComparator.calculateError(inputNoteSequence, noteSequence,
-                                            length, 1, 10);
+                                    double distance = NoteSequenceComparator.calculateError(noteSequence, inputNoteSequence,
+                                            length, 1.0, 10.0);
                                     FitParams fitParams = new FitParams(fourierFitParams, quasiNotesFitParams, distance);
                                     outDistances.println(fitParams);
                                     System.out.println("\t\t" + fitParams);
