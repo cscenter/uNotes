@@ -108,15 +108,15 @@ public class QuasiNotes {
 
     public QuasiNotes(TimeSeries series, int startCount, int countsInRange, Spectrum spectrum,
                       double relativePowerThreshold, double powerThreshold, double statisticalSignificance,
-                      double absolutePowerThreshold, double firstOvertoneFactor) throws FileNotFoundException {
+                      double absolutePowerThreshold, double firstOvertoneFactor, double firstOctaveFactor) throws FileNotFoundException {
         this(series, startCount, countsInRange, spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE,
-                relativePowerThreshold, powerThreshold, statisticalSignificance, absolutePowerThreshold, firstOvertoneFactor);   //all MIDI notes (from C-1 to G9)
+                relativePowerThreshold, powerThreshold, statisticalSignificance, absolutePowerThreshold, firstOctaveFactor);   //all MIDI notes (from C-1 to G9)
     }
 
     public QuasiNotes(TimeSeries series, int startCount, int countsInRange, Spectrum spectrum,
                       int minMidiCode, int maxMidiCode,
                       double relativePowerThreshold, double powerThreshold, double statisticalSignificance,
-                      double absolutePowerThreshold, double firstOvertoneFactor) {
+                      double absolutePowerThreshold, double firstOctaveFactor) {
         myMinMidiCode = minMidiCode;
         myMaxMidiCode = maxMidiCode;
         myTimeStep = spectrum.getTimeStep();
@@ -138,6 +138,7 @@ public class QuasiNotes {
         pex.loadSpectrum(power);
         pex.extract();
         ArrayList<ArrayList<Peak>> allPeaks = pex.getPeaks();
+
         extractMyPeaks(allPeaks);
 
         myAlignedAmplitude = series.getAlignedAmplitude(startCount, countsInRange);
@@ -151,8 +152,6 @@ public class QuasiNotes {
 
         basicValidation();
 
-        octaveValidation(firstOvertoneFactor);
-
         timeValidation();
 
         amplitudeValidation();
@@ -161,10 +160,19 @@ public class QuasiNotes {
 
         secondaryValidation(alignedPower);
 
-        trimming(0.10);
+        smooth(60.0 / 140.0 / 4, 0.06, 2.5, 0.75);
 
-        timeSmooth(60.0 / 140.0 / 4);
+        ArrayList<double[]> myNewNotePowerSeries = new ArrayList<double[]>();
+        int i = 0;
+        while(i * myTimeStep + 1e-06 < spectrum.getTimeZeroPoint()) {
+            myNewNotePowerSeries.add(new double[myNoteAlphabet.getSize()]);
+            ++i;
+        }
+        for (i = 0; i < myNotePowerSeries.size(); ++i) {
+            myNewNotePowerSeries.add(myNotePowerSeries.get(i));
+        }
 
+        myNotePowerSeries = myNewNotePowerSeries;
     }
 
     /**
@@ -203,22 +211,6 @@ public class QuasiNotes {
                 }
             }
             myNotePowerSeries.add(notePowerSlice);
-        }
-    }
-
-    private void octaveValidation(double firstOvertoneFactor) {
-        for (int i = 0; i < myNotePowerSeries.size(); ++i) {
-            double[] notePowerSlice = myNotePowerSeries.get(i);
-            Peak[] peakSlice = myPeaks.get(i);
-            for (int j = 0; j + 12 < notePowerSlice.length; ++j) {
-                if (peakSlice[j] != null) {
-                    if (peakSlice[j + 12] == null) {
-                        notePowerSlice[j] /= 10.0;  //  TODO
-                    } else {
-                        notePowerSlice[j] *= Math.exp(1 - firstOvertoneFactor * (peakSlice[j].powerRel) / (peakSlice[j + 12].powerRel));
-                    }
-                }
-            }
         }
     }
 
@@ -274,6 +266,18 @@ public class QuasiNotes {
         }
     }
 
+    private void smooth(double minDuration, double gravy, double divider, double dividerPower) {
+        trimming(gravy);
+
+        timeSmooth(minDuration, gravy);
+
+        frequencySmooth(divider, dividerPower);
+
+        trimming(gravy);
+
+        timeSmooth(minDuration, gravy);
+    }
+
     /**
      * This method trim our probability for some level
      */
@@ -287,15 +291,60 @@ public class QuasiNotes {
         }
     }
 
-    private void timeSmooth(double minDuration) {
+    //
+    private void frequencySmooth(double divider, double dividerPower) {
+        for (int i = 0; i < myNotePowerSeries.size(); ++i) {
+            double[] notePowerSlice = myNotePowerSeries.get(i);
+            for (int j = 0; j < notePowerSlice.length; ++j) {
+                if (notePowerSlice[j] > 0.0) {
+                    int k = 1;
+                    double currentDivider = divider;
+                    while (k * 12 + j - 1 < notePowerSlice.length) {
+                        devideProbability(notePowerSlice, divider, j + k * 12);
+                        devideProbability(notePowerSlice, Math.pow(divider, dividerPower), j + k * 12 + 1);
+                        devideProbability(notePowerSlice, Math.pow(divider, dividerPower), j + k * 12 - 1);
+                        divider = Math.pow(divider, dividerPower);
+                        ++k;
+                    }
+                }
+            }
+        }
+    }
+
+    private void devideProbability(double[] notePowerSlice, double divider, int position) {
+        if (position < notePowerSlice.length) {
+            notePowerSlice[position] /= divider;
+        }
+    }
+
+    /*
+    private void frequencySmooth() {
+        for (int i = 0; i < myNotePowerSeries.size(); ++i) {
+            double[] notePowerSlice = myNotePowerSeries.get(i);
+            for (int j = 0; j < notePowerSlice.length; ++j) {
+                if ((notePowerSlice[j] > 0.0) && ((j + 11) < notePowerSlice.length)) {
+                    notePowerSlice[j + 11] /= 1.5;
+                    if ((j + 12) < notePowerSlice.length) {
+                        notePowerSlice[j + 12] /= 3.0;
+                        if ((j + 13) < notePowerSlice.length) {
+                            notePowerSlice[j + 13] /= 1.5;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    */
+
+    private void timeSmooth(double minDuration, double gravy) {
         int durationInCounts = (int) (minDuration / myTimeStep);
         for (int noteIndex = 0; noteIndex < myNoteAlphabet.getSize(); ++noteIndex) {
             int position = 0;
             boolean isPlayed = false;
             while (position < myNotePowerSeries.size()) {
                 int noteBegin = takeNoteBegin(noteIndex, position);
-                if ((isPlayed) && ((noteBegin - position) < minDuration)) {
-                    fillNote(noteIndex, position, noteBegin);
+                if ((isPlayed) && ((noteBegin - position) < durationInCounts)) {
+                    fillNote(gravy, noteIndex, position, noteBegin);
                 }
                 position = takeNoteEnd(noteIndex, noteBegin);
                 isPlayed = true;
@@ -305,7 +354,7 @@ public class QuasiNotes {
                 int noteBegin = takeNoteBegin(noteIndex, position);
                 int noteEnd = takeNoteEnd(noteIndex, noteBegin);
                 position = noteEnd;
-                if (noteEnd - noteBegin < minDuration) {
+                if (noteEnd - noteBegin < durationInCounts) {
                     clearNote(noteIndex, noteBegin, noteEnd);
                 }
             }
@@ -338,7 +387,7 @@ public class QuasiNotes {
         }
     }
 
-    private void fillNote(int noteCode, int beginPos, int endPos) {
+    private void fillNote(double gravy, int noteCode, int beginPos, int endPos) {
         if (beginPos > endPos) {
             throw new IllegalArgumentException("beginPos must be less then endPos " + beginPos + " " + endPos);
         }
@@ -346,7 +395,7 @@ public class QuasiNotes {
             throw new IllegalArgumentException("Positions must be positive beginPos = " + beginPos + " endPos = " + endPos);
         }
         for (int i = beginPos; i < endPos; ++i) {
-            myNotePowerSeries.get(i)[noteCode] = 0.5;
+            myNotePowerSeries.get(i)[noteCode] = gravy * 1.1;
         }
     }
 
