@@ -300,10 +300,10 @@ public class QuasiNotes {
                     int k = 1;
                     double currentDivider = divider;
                     while (k * 12 + j - 1 < notePowerSlice.length) {
-                        devideProbability(notePowerSlice, divider, j + k * 12);
-                        devideProbability(notePowerSlice, Math.pow(divider, dividerPower), j + k * 12 + 1);
-                        devideProbability(notePowerSlice, Math.pow(divider, dividerPower), j + k * 12 - 1);
-                        divider = Math.pow(divider, dividerPower);
+                        devideProbability(notePowerSlice, currentDivider, j + k * 12);
+                        devideProbability(notePowerSlice, Math.pow(currentDivider, dividerPower), j + k * 12 + 1);
+                        devideProbability(notePowerSlice, Math.pow(currentDivider, dividerPower), j + k * 12 - 1);
+                        currentDivider = Math.pow(currentDivider, dividerPower);
                         ++k;
                     }
                 }
