@@ -28,6 +28,7 @@ public class QuasiNotes {
 
     public double myAbsolutePowerThreshold;
 
+    private double myTempo;
 
     public QuasiNotes(Spectrum spectrum, int minMidiCode, int maxMidiCode, double relativePowerThreshold,
                       double powerThreshold, double statisticalSignificance) {
@@ -134,6 +135,8 @@ public class QuasiNotes {
         for (int i = 0; i < zeroElementsNumber; ++i) {
             myAlignedAmplitude.add(0.0);
         }
+
+        myTempo = series.getTempo(startCount, countsInRange);
 
         WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(spectrum, myNoteAlphabet.getFrequencies());
         myWaveletPower = noteGetter.spectrumTransformWithCounts(alignedPower);
@@ -380,6 +383,10 @@ public class QuasiNotes {
 
     public double getTimeStep() {
         return myTimeStep;
+    }
+
+    public double getTempo() {
+        return myTempo;
     }
 
     public ArrayList<double[]> getNotePowerSeries() {

@@ -1,6 +1,7 @@
 package conversions;
 
 import com.sun.istack.internal.NotNull;
+import conversions.fourier.util.FFT;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -175,5 +176,34 @@ public class TimeSeries {
             i += countsInRange;
         }
         return alignedAmplitude;
+    }
+
+    public double getTempo(int startCount, int countsInRange) {
+        ArrayList<Double> alignedAmplitude = getAlignedAmplitude(startCount, countsInRange);
+        int size = 2;
+        while (size < alignedAmplitude.size()) {
+            size *= 2;
+        }
+        double[] Re = new double [size];
+        double[] Im = new double [size];
+        for (int i = 0; i < alignedAmplitude.size(); ++i) {
+            Re[i] = alignedAmplitude.get(i);
+        }
+
+        FFT myFFT = new FFT(size);
+        myFFT.transform(Re, Im);
+        double[] power = new double [size / 2];
+        for (int i = 0; i < power.length; ++i) {
+            power[i] = Math.sqrt(Re[i] * Re[i] + Im[i] * Im[i]);
+        }
+
+        int maxCount = countsInRange * size / mySampleRate / 2;
+        for (int i = countsInRange / mySampleRate + 1; i < power.length; ++i) {
+            if (power[maxCount] < power[i]) {
+                maxCount = i;
+            }
+        }
+        double nu = 1.0 * maxCount * (mySampleRate / countsInRange) / size;
+        return nu;
     }
 }
