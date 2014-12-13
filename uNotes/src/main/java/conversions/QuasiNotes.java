@@ -139,6 +139,7 @@ public class QuasiNotes {
         myTempo = series.getTempo(startCount, countsInRange);
 
         WaveletSpectrumTransform noteGetter = new WaveletSpectrumTransform(spectrum, myNoteAlphabet.getFrequencies());
+
         myWaveletPower = noteGetter.spectrumTransformWithCounts(alignedPower);
 
         basicValidation();
@@ -152,6 +153,7 @@ public class QuasiNotes {
         secondaryValidation(alignedPower);
 
         smooth(minDuration, gravy, divider, dividerPower);
+
         //smooth(60.0 / 140.0 / 4, 0.06, 2.5, 0.75);
 
         ArrayList<double[]> myNewNotePowerSeries = new ArrayList<double[]>();
@@ -227,7 +229,7 @@ public class QuasiNotes {
             double[] notePowerSlice = myNotePowerSeries.get(i);
             for (int j = 0; j < peakSlice.length; ++j) {
                 if (peakSlice[j] != null) {
-                    notePowerSlice[j] *= Math.exp((peakSlice[j].power - maxAmplitude) / 10.0);
+                    notePowerSlice[j] *= Math.exp((peakSlice[j].power - maxAmplitude) / 20.0);
                 }
             }
         }
@@ -259,6 +261,7 @@ public class QuasiNotes {
     }
 
     private void smooth(double minDuration, double gravy, double divider, double dividerPower) {
+
         trimming(gravy);
 
         timeSmooth(minDuration, gravy);
@@ -268,6 +271,7 @@ public class QuasiNotes {
         trimming(gravy);
 
         timeSmooth(minDuration, gravy);
+
     }
 
     /**
@@ -371,7 +375,6 @@ public class QuasiNotes {
             myNotePowerSeries.get(i)[noteCode] = gravy * 1.1;
         }
     }
-
 
     public int getMaxMidiCode() {
         return myMaxMidiCode;

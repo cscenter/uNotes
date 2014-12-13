@@ -24,7 +24,7 @@ public class NoteExtractorRunner {
         File outputDir = new File("test", "output");
         outputDir.mkdir();
 
-        String inputFileName = "Rondo alla Turka part1.wav";
+        String inputFileName = "vfs.wav";
         File in = new File(inputDir, inputFileName);
 
         System.out.println("uNotes");

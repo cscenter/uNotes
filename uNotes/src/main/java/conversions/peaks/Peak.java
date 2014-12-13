@@ -11,6 +11,9 @@ public class Peak {
     public Peak(double pow, double powNoise, double center, double width) {
         this.power = pow;
         this.powerRel = pow - powNoise;
+        if (this.powerRel < 1.0e-9) {
+            this.powerRel = 1.0e-9;
+        }
         this.center = center;
         this.width = width;
         this.leftBorder = center - width / 2;
