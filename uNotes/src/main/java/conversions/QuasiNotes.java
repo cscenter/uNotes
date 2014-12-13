@@ -26,22 +26,8 @@ public class QuasiNotes {
     private ArrayList<Double> myAlignedAmplitude;
     private ArrayList<double[]> myWaveletPower;
 
-    public double myAbsolutePowerThreshold = -20;
+    public double myAbsolutePowerThreshold;
 
-    @Deprecated
-    public QuasiNotes(Spectrum spectrum) throws FileNotFoundException {
-        this(spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE);   //all MIDI notes (from C-1 to G9)
-    }
-
-    public QuasiNotes(Spectrum spectrum, double relativePowerThreshold, double powerThreshold, double statisticalSignificance) {
-        this(spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE, relativePowerThreshold,
-                powerThreshold, statisticalSignificance);
-    }
-
-    @Deprecated
-    public QuasiNotes(Spectrum spectrum, int minMidiCode, int maxMidiCode) {
-        this(spectrum, minMidiCode, maxMidiCode, 20.0, 0.0, 0.003);
-    }
 
     public QuasiNotes(Spectrum spectrum, int minMidiCode, int maxMidiCode, double relativePowerThreshold,
                       double powerThreshold, double statisticalSignificance) {
@@ -108,15 +94,17 @@ public class QuasiNotes {
 
     public QuasiNotes(TimeSeries series, int startCount, int countsInRange, Spectrum spectrum,
                       double relativePowerThreshold, double powerThreshold, double statisticalSignificance,
-                      double absolutePowerThreshold, double firstOvertoneFactor, double firstOctaveFactor) throws FileNotFoundException {
+                      double absolutePowerThreshold, double firstOctaveFactor
+            , double minDuration, double gravy, double divider, double dividerPower) throws FileNotFoundException {
         this(series, startCount, countsInRange, spectrum, MidiHelper.MIN_MIDI_CODE, MidiHelper.MAX_MIDI_CODE,
-                relativePowerThreshold, powerThreshold, statisticalSignificance, absolutePowerThreshold, firstOctaveFactor);   //all MIDI notes (from C-1 to G9)
+                relativePowerThreshold, powerThreshold, statisticalSignificance, absolutePowerThreshold,
+                minDuration, gravy, divider, dividerPower);   //all MIDI notes (from C-1 to G9)
     }
 
     public QuasiNotes(TimeSeries series, int startCount, int countsInRange, Spectrum spectrum,
                       int minMidiCode, int maxMidiCode,
                       double relativePowerThreshold, double powerThreshold, double statisticalSignificance,
-                      double absolutePowerThreshold, double firstOctaveFactor) {
+                      double absolutePowerThreshold, double minDuration, double gravy, double divider, double dividerPower) {
         myMinMidiCode = minMidiCode;
         myMaxMidiCode = maxMidiCode;
         myTimeStep = spectrum.getTimeStep();
@@ -160,7 +148,8 @@ public class QuasiNotes {
 
         secondaryValidation(alignedPower);
 
-        smooth(60.0 / 140.0 / 4, 0.06, 2.5, 0.75);
+        smooth(minDuration, gravy, divider, dividerPower);
+        //smooth(60.0 / 140.0 / 4, 0.06, 2.5, 0.75);
 
         ArrayList<double[]> myNewNotePowerSeries = new ArrayList<double[]>();
         int i = 0;

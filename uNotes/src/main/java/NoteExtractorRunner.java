@@ -24,7 +24,7 @@ public class NoteExtractorRunner {
         File outputDir = new File("test", "output");
         outputDir.mkdir();
 
-        String inputFileName = "Rondo alla Turka.wav";
+        String inputFileName = "Rondo alla Turka part1.wav";
         File in = new File(inputDir, inputFileName);
 
         System.out.println("uNotes");
@@ -59,13 +59,16 @@ public class NoteExtractorRunner {
             double powerThreshold = 5;
             double statisticalSignificance = 0.01;
             double absolutePowerThreshold = 0;
-            double firstOvertoneFactor = 0.5;
+            double minDuration = 60.0 / 140.0 / 4;
+            double gravy = 0.06;
+            double divider = 2.5;
+            double dividerPower = 0.75;
 
             PrintStream outNotes = new PrintStream(new File(outputDir, inputFileName + ".npw.dat"));
 
             QuasiNotes quasiNotes = new QuasiNotes(series, windowLength / 2, timeStepLength,
                     spectrum, Note.C.midiCode(1), Note.B.midiCode(6), relativePowerThreshold,
-                    powerThreshold, statisticalSignificance, absolutePowerThreshold, firstOvertoneFactor);
+                    powerThreshold, statisticalSignificance, absolutePowerThreshold, minDuration, gravy, divider, dividerPower);
             ArrayList<double[]> notePower = quasiNotes.getNotePowerSeries();
             for (int i = 0; i < notePower.size(); ++i) {
                 outNotes.print(i * dt + " ");
@@ -79,23 +82,16 @@ public class NoteExtractorRunner {
             //
             //MIDI output
             File outMidi = new File(outputDir, inputFileName + ".npw.mid");
-            //NoteSequence noteSequence = new NoteSequence(quasiNotes, 140, 4);
-            NoteSequence noteSequence = new NoteSequence(quasiNotes);
+            NoteSequence noteSequence = new NoteSequence(quasiNotes, 140, 4);
             MidiSystem.write(noteSequence.getMidiSequence(), 0, outMidi);
             //
             ArrayList<Double> alignedAmplitude = series.getAlignedAmplitude(windowLength / 2, timeStepLength);
             PrintStream outAmplitude = new PrintStream(new File(outputDir, inputFileName + ".amp.dat"));
             double[] hist = histogram(alignedAmplitude, 20);
-            /*
-            for (int i = 0; i < alignedAmplitude.size(); ++i) {
-                outAmplitude.println((1.0 * (i * timeStepLength + windowLength / 2) / series.getSampleRate()) + "   " + alignedAmplitude.get(i));
-            }
-            */
-            //
+
             for (int i = 0; i < hist.length; ++i) {
                 outAmplitude.println(i + "  " + hist[i]);
             }
-            //
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
@@ -120,11 +116,11 @@ public class NoteExtractorRunner {
             }
         }
         double delta = (max - min) / n;
-        for (int i = 0; i < value.size(); ++i) {
+        for (Double aValue : value) {
             boolean flag = true;
             int j = 0;
             while ((j < n) && (flag)) {
-                if ((value.get(i) > (min - 1.0e-9 + j * delta)) && (value.get(i) < (min + 1.0e-9 + (j + 1) * delta))) {
+                if ((aValue > (min - 1.0e-9 + j * delta)) && (aValue < (min + 1.0e-9 + (j + 1) * delta))) {
                     answer[j] += 1.0;
                     flag = false;
                 }
