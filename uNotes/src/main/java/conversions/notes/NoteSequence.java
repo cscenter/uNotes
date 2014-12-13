@@ -124,7 +124,7 @@ public class NoteSequence {
      * @throws InvalidMidiDataException
      */
     // TODO add note power threshold (=0 by default)
-    // TODO ingnore short notes?
+    // TODO ignore short notes?
     public NoteSequence(@NotNull QuasiNotes quasiNotes, int tempoInBPM, int ticksPerQuarterNote) throws InvalidMidiDataException {
         myTempoInBPM = tempoInBPM;
 

@@ -2,8 +2,9 @@ package conversions;
 
 import com.sun.istack.internal.NotNull;
 
-import javax.sound.sampled.*;
-import java.io.*;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Vector;
 

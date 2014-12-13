@@ -53,6 +53,7 @@ public class Spectrum {
      * This method aligns myPowerSpectrum.
      * For each frequency at given time we subtract from its power the mean power of its neighbours
      * It will save harmonic components in spectrum and filter trend.
+     *
      * @return alignedPowerSpectrum
      */
     public ArrayList<double[]> getAlignedPowerSpectrum() {

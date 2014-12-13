@@ -164,7 +164,7 @@ public class QuasiNotes {
 
         ArrayList<double[]> myNewNotePowerSeries = new ArrayList<double[]>();
         int i = 0;
-        while(i * myTimeStep + 1e-06 < spectrum.getTimeZeroPoint()) {
+        while (i * myTimeStep + 1e-06 < spectrum.getTimeZeroPoint()) {
             myNewNotePowerSeries.add(new double[myNoteAlphabet.getSize()]);
             ++i;
         }
@@ -300,9 +300,9 @@ public class QuasiNotes {
                     int k = 1;
                     double currentDivider = divider;
                     while (k * 12 + j - 1 < notePowerSlice.length) {
-                        devideProbability(notePowerSlice, currentDivider, j + k * 12);
-                        devideProbability(notePowerSlice, Math.pow(currentDivider, dividerPower), j + k * 12 + 1);
-                        devideProbability(notePowerSlice, Math.pow(currentDivider, dividerPower), j + k * 12 - 1);
+                        divideProbability(notePowerSlice, currentDivider, j + k * 12);
+                        divideProbability(notePowerSlice, Math.pow(currentDivider, dividerPower), j + k * 12 + 1);
+                        divideProbability(notePowerSlice, Math.pow(currentDivider, dividerPower), j + k * 12 - 1);
                         currentDivider = Math.pow(currentDivider, dividerPower);
                         ++k;
                     }
@@ -311,30 +311,11 @@ public class QuasiNotes {
         }
     }
 
-    private void devideProbability(double[] notePowerSlice, double divider, int position) {
+    private void divideProbability(double[] notePowerSlice, double divider, int position) {
         if (position < notePowerSlice.length) {
             notePowerSlice[position] /= divider;
         }
     }
-
-    /*
-    private void frequencySmooth() {
-        for (int i = 0; i < myNotePowerSeries.size(); ++i) {
-            double[] notePowerSlice = myNotePowerSeries.get(i);
-            for (int j = 0; j < notePowerSlice.length; ++j) {
-                if ((notePowerSlice[j] > 0.0) && ((j + 11) < notePowerSlice.length)) {
-                    notePowerSlice[j + 11] /= 1.5;
-                    if ((j + 12) < notePowerSlice.length) {
-                        notePowerSlice[j + 12] /= 3.0;
-                        if ((j + 13) < notePowerSlice.length) {
-                            notePowerSlice[j + 13] /= 1.5;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    */
 
     private void timeSmooth(double minDuration, double gravy) {
         int durationInCounts = (int) (minDuration / myTimeStep);

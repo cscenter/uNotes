@@ -1,7 +1,5 @@
 package conversions.fourier.util;
 
-import java.lang.Math;
-
 public final class FFT {
     private int n;
     private int m;

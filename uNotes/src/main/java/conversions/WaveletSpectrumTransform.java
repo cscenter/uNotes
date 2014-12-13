@@ -109,7 +109,7 @@ public class WaveletSpectrumTransform implements Transformation {
             Complex waveletAmplitude;
             Complex[] section;
 
-            double normalize = (double)(myWindowLength * myWindowLength);
+            double normalize = (double) (myWindowLength * myWindowLength);
 
             for (int i = 0; i < scaleLength; ++i) {
                 section = myWavelet.get(i);
