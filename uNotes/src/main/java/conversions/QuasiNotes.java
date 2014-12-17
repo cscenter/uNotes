@@ -241,7 +241,7 @@ public class QuasiNotes {
             double[] notePowerSlice = myNotePowerSeries.get(i);
             for (int j = 0; j < peakSlice.length; ++j) {
                 if (peakSlice[j] != null) {
-                    notePowerSlice[j] *= Math.exp(-myRelativePowerThreshold / 10.0 / peakSlice[j].powerRel);
+                    notePowerSlice[j] *= Math.exp(-myRelativePowerThreshold / peakSlice[j].powerRel);
                 }
             }
         }
